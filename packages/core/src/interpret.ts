@@ -52,7 +52,12 @@ export type UiArrow = {
   byAgent?: boolean;
 };
 
-export type UiTree = { roots: UiNode[]; arrows: UiArrow[] };
+export type UiTree = {
+  roots: UiNode[];
+  arrows: UiArrow[];
+  /** Each note's id mapped to the node it was attached to, since notes aren't nodes themselves. */
+  noteOwners: Map<string, string>;
+};
 
 const CONTAINER_TYPES = new Set(['rectangle', 'ellipse', 'diamond', 'frame', 'magicframe']);
 
@@ -136,7 +141,7 @@ export function interpret(elements: readonly Element[]): UiTree {
   for (const el of placed) nodes.set(el.id, toNode(el, labels));
 
   const arrows: UiArrow[] = [];
-  const pointedNotes = new Set<string>();
+  const noteOwners = new Map<string, string>();
   for (const el of live) {
     if (el.type !== 'arrow') continue;
     const ends = endpoints(el);
@@ -147,7 +152,7 @@ export function interpret(elements: readonly Element[]): UiTree {
     // An arrow from a note to an element hangs the note on that element.
     if (fromEl && isNote(fromEl) && toNodeRef && from !== to) {
       toNodeRef.notes.push(noteText(fromEl));
-      pointedNotes.add(fromEl.id);
+      noteOwners.set(fromEl.id, toNodeRef.id);
       continue;
     }
     const label = labels.get(el.id);
@@ -164,10 +169,11 @@ export function interpret(elements: readonly Element[]): UiTree {
   const roots: UiNode[] = [];
   const childrenOf = new Map<string, Element[]>();
   for (const el of placed) {
-    if (pointedNotes.has(el.id)) continue;
+    if (noteOwners.has(el.id)) continue;
     const parent = parentOf(el);
     if (isNote(el) && parent) {
       nodes.get(parent.id)?.notes.push(noteText(el));
+      noteOwners.set(el.id, parent.id);
       continue;
     }
     if (!parent) {
@@ -188,7 +194,7 @@ export function interpret(elements: readonly Element[]): UiTree {
   }
 
   const rootRows = readingRows(roots, (n) => n.box);
-  return { roots: rootRows.flat(), arrows };
+  return { roots: rootRows.flat(), arrows, noteOwners };
 }
 
 function toNode(el: Element, labels: Map<string, string>): UiNode {
@@ -226,7 +232,7 @@ export function findNode(roots: readonly UiNode[], id: string): UiNode | undefin
 
 /**
  * The selected subtrees: each selected node with its children, skipping nodes whose ancestor is
- * also selected. Selected labels count as their container.
+ * also selected. Selected labels count as their container, and selected notes as what they annotate.
  */
 export function selectedSubtrees(
   tree: UiTree,
@@ -236,7 +242,7 @@ export function selectedSubtrees(
   const containerOf = new Map(
     elements.filter((el) => el.containerId).map((el) => [el.id, el.containerId as string]),
   );
-  const ids = new Set(selected.map((id) => containerOf.get(id) ?? id));
+  const ids = new Set(selected.map((id) => containerOf.get(id) ?? tree.noteOwners.get(id) ?? id));
   const out: UiNode[] = [];
   const walk = (nodes: readonly UiNode[]) => {
     for (const node of nodes) {

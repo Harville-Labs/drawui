@@ -284,4 +284,14 @@ describe('selection', () => {
     expect(selectedSubtrees(tree, ['t'], elements).map((n) => n.id)).toEqual(['btn']);
     expect(selectedSubtrees(tree, ['card', 'btn'], elements).map((n) => n.id)).toEqual(['card']);
   });
+
+  test('a selected note selects the element it annotates', () => {
+    const elements = [
+      rect('card', 0, 0, 300, 300),
+      text('n', 20, 20, '// rounded corners'),
+      rect('other', 400, 0, 50, 50),
+    ];
+    const tree = interpret(elements);
+    expect(selectedSubtrees(tree, ['n'], elements).map((n) => n.id)).toEqual(['card']);
+  });
 });

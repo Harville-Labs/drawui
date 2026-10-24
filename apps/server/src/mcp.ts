@@ -141,7 +141,7 @@ export function createMcpServer(ctx: Context): McpServer {
       if (selection.length === 0) return text('Nothing is selected.');
       const parsed = parseElements(elements);
       const roots = selectedSubtrees(interpret(parsed), selection, parsed);
-      return text(outline({ roots, arrows: [] }));
+      return text(outline({ roots, arrows: [], noteOwners: new Map() }));
     },
   );
 
