@@ -1,0 +1,29 @@
+{
+  "name": "drawui-monorepo",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "packageManager": "bun@1.4.2",
+  "engines": {
+    "bun": ">=1.4.0"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "bun run --cwd apps/canvas build && bun apps/server/src/main.ts",
+    "start": "bun apps/server/src/main.ts",
+    "build": "bun run --cwd apps/canvas build",
+    "test": "bun test",
+    "typecheck": "tsc -p . && bun run --cwd apps/canvas check",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "check": "bun run lint && bun run typecheck && bun test && bun run build && sh scripts/check-file-length.sh"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.6.3",
+    "@types/bun": "^1.4.4",
+    "typescript": "^5.9.3"
+  }
+}
