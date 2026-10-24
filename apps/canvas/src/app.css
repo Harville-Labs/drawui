@@ -1,0 +1,126 @@
+/*
+ * Harville Labs' night-shift drafting tokens (see the agents repo, standards/design.md), with
+ * Sivir's theme mapped onto them. The canvas is a tool, so controls are denser than on the site.
+ */
+@import "@fontsource-variable/archivo/wdth.css";
+@import "@fontsource/b612-mono/latin-400.css";
+@import "@fontsource/b612-mono/latin-700.css";
+@import "@sivir-ui/svelte/ui.css";
+
+:root {
+  --paper: #16181b;
+  --paper-light: #1e2125;
+  --paper-dark: #292d32;
+  --ink: #eceae3;
+  --muted: #9a9c9f;
+  --hair: #34383d;
+  --accent: #9cc3ff;
+  --on-accent: #101318;
+  --field: #121417;
+  --bad: #ff9c8f;
+  --good: #8fd6a4;
+
+  color-scheme: dark;
+
+  --display: "Archivo Variable", "Archivo", "Arial Narrow", Arial, sans-serif;
+  --mono: "B612 Mono", ui-monospace, Menlo, monospace;
+}
+
+@theme {
+  --color-paper: var(--paper);
+  --color-paper-light: var(--paper-light);
+  --color-paper-dark: var(--paper-dark);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-hair: var(--hair);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-field: var(--field);
+  --color-bad: var(--bad);
+  --color-good: var(--good);
+
+  --font-sans: var(--display);
+  --font-display: var(--display);
+  --font-mono: var(--mono);
+  --font-header: var(--display);
+
+  --sivir-space-unit: 4px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --border-size: 1.5px;
+  --color-background: var(--paper);
+  --color-card: var(--paper-light);
+  --color-panel: var(--paper-light);
+  --color-secondary: var(--paper-dark);
+  --color-border: var(--hair);
+  --color-border-strong: var(--ink);
+  --color-input: var(--hair);
+  --color-foreground: var(--ink);
+  --color-foreground-muted: var(--muted);
+  --color-primary: var(--accent);
+  --color-primary-hover: var(--ink);
+  --color-on-primary: var(--on-accent);
+  --color-button-foreground: var(--ink);
+  --color-accent-tint: var(--paper-dark);
+  --color-ring: var(--accent);
+  --color-overlay: rgb(0 0 0 / 0.55);
+  --color-field-hover: var(--paper-dark);
+  --color-field-foreground: var(--ink);
+  --color-error: var(--bad);
+  --color-success: var(--good);
+  --color-tooltip: var(--ink);
+  --color-tooltip-foreground: var(--paper);
+  --focus-ring: 0 0 0 2px var(--accent);
+  --elevation-1: none;
+  --elevation-float: none;
+  --elevation-modal: none;
+  --elevation-control: inset 0 0 0 var(--border-size) var(--color-border);
+  --elevation-button-outline: inset 0 0 0 var(--border-size) var(--color-border);
+  --ui-cursor-interactive: pointer;
+  --font-size-body: 14px;
+  --font-size-button: 13px;
+  --font-weight-button: 700;
+  --size-control-md: 34px;
+  --size-button-md: 34px;
+  --padding-button-x: 14px;
+}
+
+/* Mono annotation text, like the labels on a drawing. */
+@utility annotation {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+@layer base {
+  :root {
+    font-family: var(--display);
+    font-synthesis: none;
+    color: var(--ink);
+    background: var(--paper);
+    -webkit-font-smoothing: antialiased;
+  }
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+  }
+  body {
+    min-width: 320px;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 14px;
+  }
+  ::selection {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
