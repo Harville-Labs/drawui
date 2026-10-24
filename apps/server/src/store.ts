@@ -138,6 +138,11 @@ export class SceneStore {
   }
 }
 
+// Deleted elements stay in memory so open tabs can reconcile the deletion, but the file keeps only
+// what's drawn, so it diffs cleanly in git.
 function serialize(elements: readonly unknown[], files: Readonly<Record<string, unknown>>): string {
-  return `${JSON.stringify({ type: 'excalidraw', version: 2, source: 'drawui', elements, appState: {}, files }, null, 2)}\n`;
+  const drawn = elements.filter(
+    (el) => !(el && typeof el === 'object' && 'isDeleted' in el && el.isDeleted === true),
+  );
+  return `${JSON.stringify({ type: 'excalidraw', version: 2, source: 'drawui', elements: drawn, appState: {}, files }, null, 2)}\n`;
 }

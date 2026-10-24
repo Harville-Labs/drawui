@@ -35,6 +35,15 @@ describe('SceneStore', () => {
     });
   });
 
+  test('deleted elements are left out of the saved file', async () => {
+    const file = memoryFile();
+    const store = await SceneStore.open(file);
+    store.setScene([rect, { ...rect, id: 'gone', isDeleted: true }], {});
+    await store.flush();
+    expect(JSON.parse(file.text ?? '').elements).toEqual([rect]);
+    expect(store.snapshot.elements).toHaveLength(2);
+  });
+
   test('an identical scene is not a change', async () => {
     const file = memoryFile();
     const store = await SceneStore.open(file);
