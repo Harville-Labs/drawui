@@ -108,3 +108,39 @@ export function layoutOf(rows: readonly (readonly unknown[])[]): Layout | undefi
   const width = rows[0]?.length ?? 0;
   return rows.every((r) => r.length === width) ? 'grid' : 'rows';
 }
+
+/** Where the line from a box's center toward `toward` crosses the box's edge, pushed `gap` further out. */
+function edgeToward(b: Box, toward: Point, gap: number): Point {
+  const [cx, cy] = center(b);
+  const dx = toward[0] - cx;
+  const dy = toward[1] - cy;
+  if (dx === 0 && dy === 0) return [cx, cy];
+  const halfW = b.width / 2 + gap;
+  const halfH = b.height / 2 + gap;
+  const scale = Math.min(
+    dx === 0 ? Infinity : halfW / Math.abs(dx),
+    dy === 0 ? Infinity : halfH / Math.abs(dy),
+  );
+  return [cx + dx * scale, cy + dy * scale];
+}
+
+/**
+ * A straight arrow from one box's edge to another's, as an origin and points relative to it, stopping
+ * `gaps` short of each box. Boxes that overlap get an arrow between their centers.
+ */
+export function arrowBetween(
+  from: Box,
+  to: Box,
+  [fromGap, toGap]: [number, number] = [0, 0],
+): { x: number; y: number; points: Point[] } {
+  const start = edgeToward(from, center(to), fromGap);
+  const end = edgeToward(to, center(from), toGap);
+  return {
+    x: start[0],
+    y: start[1],
+    points: [
+      [0, 0],
+      [end[0] - start[0], end[1] - start[1]],
+    ],
+  };
+}
