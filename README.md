@@ -24,6 +24,8 @@ That opens the canvas at `http://localhost:4747` for `~/code/my-app`. Leave the 
 claude mcp add --transport http drawui http://localhost:4747/mcp
 ```
 
+Or copy [`.mcp.json`](.mcp.json) into your project's root so everyone working in it gets the server. Change the port there if you start drawui with `--port`.
+
 Pick a component library in the top bar (Sivir UI, shadcn/ui, and shadcn-svelte are suggested; any name works) and, if you like, the URL of your dev server so the preview sits beside the drawing. Then ask the agent to "build what I drew in drawui", or use the `build` prompt.
 
 ## How to draw
