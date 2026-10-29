@@ -6,6 +6,7 @@ Reading a drawing:
 - Text inside a shape is its visible label. Use it verbatim as the component's text.
 - Text that starts with "//" is a note to you, not UI. A note applies to the element its arrow points at, else the element just beside it, else the container it sits in; the outline lists it on that element.
 - Arrows between screens or elements are navigation or data flow; their labels say which.
+- An "image" line is a picture the user dropped in: a screenshot to copy the look of, or a logo or photo to use. get_image shows it, and with saveTo writes it into the project as an asset. Ask which it is when the drawing doesn't say.
 - Dashed strokes and freehand lines are hints the user chose on purpose. Freehand lines are rough sketches of things the shapes don't cover; get_canvas_image shows them.
 
 Screens and devices:

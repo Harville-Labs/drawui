@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `get_image` returns a screenshot or logo the user dropped on the canvas, and with `saveTo` writes it into the project as an asset.
 - The agent's notes land in free space beside the element instead of over other shapes.
 - Several canvas tabs on one project no longer overwrite each other's edits. The server merges each tab's drawing element by element, keeping the newer copy, and sends a tab that missed an edit the merged drawing.
 - A shape the user just drew is marked selected in the outline right away; the tab now sends the new scene before the selection that names it.

@@ -59,7 +59,7 @@ Commit both if you want the drawing to live with the code.
 
 ## MCP tools
 
-`get_project`, `set_project`, `get_canvas`, `get_selection`, `get_canvas_image`, `wait_for_change`, `draw`, `update`, `delete`, and `annotate`. See [docs/mcp.md](docs/mcp.md).
+`get_project`, `set_project`, `get_canvas`, `get_selection`, `get_canvas_image`, `get_image`, `wait_for_change`, `draw`, `update`, `delete`, and `annotate`. See [docs/mcp.md](docs/mcp.md).
 
 ## Develop
 

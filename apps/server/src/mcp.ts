@@ -16,6 +16,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import type { Hub } from './hub.ts';
+import { imageOf, saveImage } from './images.ts';
 import { INSTRUCTIONS } from './instructions.ts';
 import type { ProjectStore } from './project.ts';
 import { readStack } from './project.ts';
@@ -143,6 +144,37 @@ export function createMcpServer(ctx: Context): McpServer {
           await run(ctx, { kind: 'export', ids }, 'Agent is looking'),
         );
         return { content: [{ type: 'image', data: png, mimeType: 'image/png' }] };
+      } catch (error) {
+        return failure(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    'get_image',
+    {
+      description:
+        'An image the user dropped on the canvas (a screenshot, logo, or photo), by its element id. Use a screenshot as reference. To use the image in the app, pass saveTo, a path relative to the project root such as "static/logo.png"; drawui writes the file there and never overwrites one.',
+      inputSchema: { id: z.string(), saveTo: z.string().min(1).max(500).optional() },
+    },
+    async ({ id, saveTo }) => {
+      try {
+        const { elements, files } = ctx.scene.snapshot;
+        const image = imageOf(elements, files, id);
+        const saved = saveTo ? await saveImage(ctx.root, saveTo, image) : undefined;
+        const about = `${image.mimeType}, ${image.bytes.length} bytes${saved ? `, saved to ${saved}` : ''}.`;
+        // Clients show raster images; an SVG is more use to the agent as its markup.
+        const content: CallToolResult['content'] =
+          image.mimeType === 'image/svg+xml'
+            ? [{ type: 'text', text: Buffer.from(image.bytes).toString('utf8') }]
+            : [
+                {
+                  type: 'image',
+                  data: Buffer.from(image.bytes).toString('base64'),
+                  mimeType: image.mimeType,
+                },
+              ];
+        return { content: [{ type: 'text', text: about }, ...content] };
       } catch (error) {
         return failure(error);
       }

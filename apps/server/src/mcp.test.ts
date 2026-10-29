@@ -88,6 +88,7 @@ describe('MCP over HTTP', () => {
         'draw',
         'get_canvas',
         'get_canvas_image',
+        'get_image',
         'get_project',
         'get_selection',
         'set_project',
@@ -134,6 +135,21 @@ describe('MCP over HTTP', () => {
     await Bun.sleep(50);
     scene.mergeScene([{ id: 'new', type: 'rectangle', x: 0, y: 0, width: 10, height: 10 }], {});
     expect(textOf(await waiting)).toStartWith('version 1');
+  });
+
+  test('get_image returns a dropped image as image content', async () => {
+    const data = Buffer.from('fake png').toString('base64');
+    scene.mergeScene(
+      [{ id: 'shot', type: 'image', fileId: 'f', x: 0, y: 0, width: 9, height: 9 }],
+      {
+        f: { id: 'f', mimeType: 'image/png', dataURL: `data:image/png;base64,${data}` },
+      },
+    );
+    const result = await client.callTool({ name: 'get_image', arguments: { id: 'shot' } });
+    expect(result.content).toEqual([
+      { type: 'text', text: 'image/png, 8 bytes.' },
+      { type: 'image', data, mimeType: 'image/png' },
+    ]);
   });
 
   test('get_project reports the library and its docs', async () => {
