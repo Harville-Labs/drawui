@@ -145,6 +145,19 @@ describe('MCP over HTTP', () => {
     });
   });
 
+  test('a custom library reports the docs link the user gave', async () => {
+    await client.callTool({
+      name: 'set_project',
+      arguments: { library: 'Acme UI', docs: 'https://ui.acme.dev/docs' },
+    });
+    const text = textOf(await client.callTool({ name: 'get_project', arguments: {} }));
+    expect(JSON.parse(text)).toMatchObject({
+      library: 'Acme UI',
+      libraryDocs: 'https://ui.acme.dev/docs',
+    });
+    await client.callTool({ name: 'set_project', arguments: { library: 'Sivir UI', docs: '' } });
+  });
+
   test('set_project rejects a non-http preview', async () => {
     const result = await client.callTool({
       name: 'set_project',
