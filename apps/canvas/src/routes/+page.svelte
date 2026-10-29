@@ -57,6 +57,8 @@ onDestroy(() => {
     {previewShown}
     onproject={(patch) => connection.setProject(patch)}
     onmarknote={markNote}
+    selectedScreen={() => bridge?.selectedScreen()}
+    onnewscreen={(screen, device) => bridge?.addScreen(screen, device)}
     ontogglepreview={() => (previewHidden = !previewHidden)}
   />
   <!-- The canvas keeps the larger share: below about 730px Excalidraw switches to its phone layout. -->

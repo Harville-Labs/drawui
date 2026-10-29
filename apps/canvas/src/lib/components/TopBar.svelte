@@ -1,9 +1,10 @@
 <script lang="ts">
-import type { ProjectConfig, ProjectPatch } from '@drawui/core';
+import type { Device, ProjectConfig, ProjectPatch } from '@drawui/core';
 import { Badge, Button } from '@sivir-ui/svelte';
 import type { Status } from '../connection.svelte.ts';
 import LibraryPicker from './LibraryPicker.svelte';
 import PreviewPicker from './PreviewPicker.svelte';
+import ScreenMenu from './ScreenMenu.svelte';
 
 type Props = {
   status: Status;
@@ -15,6 +16,8 @@ type Props = {
   onproject: (patch: ProjectPatch) => void;
   onmarknote: () => void;
   ontogglepreview: () => void;
+  selectedScreen: () => string | undefined;
+  onnewscreen: (screen: string, device: Device) => void;
 };
 
 let {
@@ -26,6 +29,8 @@ let {
   onproject,
   onmarknote,
   ontogglepreview,
+  selectedScreen,
+  onnewscreen,
 }: Props = $props();
 
 const statusText: Record<Status, string> = {
@@ -50,6 +55,7 @@ const statusVariant = { connecting: 'warning', open: 'success', closed: 'error' 
     ontoggle={ontogglepreview}
   />
 
+  <ScreenMenu selected={selectedScreen} oncreate={onnewscreen} />
   <Button variant="outline" onclick={onmarknote} title="Turn the selected text into notes for the agent">
     Mark as note
   </Button>

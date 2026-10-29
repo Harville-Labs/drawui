@@ -42,4 +42,4 @@ bun run format                     # apply Biome fixes
 
 - `apps/canvas/svelte.config.js` is JavaScript because SvelteKit loads it before TypeScript is set up; it is the only hand-written `.js` file.
 - `apps/canvas/src/lib/asset-path.ts` must be the first import of every module that imports Excalidraw: Excalidraw reads its font path when it is evaluated.
-- Tests sit next to the code as `*.test.ts` and run with `bun test`. The canvas has no unit tests yet; check canvas changes by running the server and driving the tools over MCP.
+- Tests sit next to the code as `*.test.ts` and run with `bun test`. Canvas op tests run Excalidraw in happy-dom with a stubbed 2D context (`apps/canvas/src/lib/test-dom.ts`), so they check element data, not rendering; check how a change looks by running the server and driving the tools over MCP.

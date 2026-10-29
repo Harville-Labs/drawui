@@ -5,12 +5,17 @@ import {
   type Box,
   type CanvasOp,
   contains,
+  DEVICES,
+  type Device,
   type DrawuiMeta,
   type ElementPatch,
+  FRAME_STROKE,
   freeSpot,
   NOTE_PREFIX,
+  nextScreenSpot,
   type Point,
   type ShapeInput,
+  screenName,
 } from '@drawui/core';
 import {
   convertToExcalidrawElements,
@@ -91,6 +96,7 @@ function skeletonOf(shape: ShapeInput): Skeleton {
         width: shape.width,
         height: shape.height,
         name: shape.name,
+        strokeColor: FRAME_STROKE,
         children: [],
         customData: agentMeta(shape.source),
       };
@@ -142,6 +148,27 @@ function placeFrames(skeletons: Skeleton[], built: ExcalidrawElement[]): Excalid
     });
   }
   return next;
+}
+
+/** A new empty screen the user asked for: a frame sized for the device, right of what is drawn. */
+export function newScreen(elements: Elements, screen: string, device: Device): ExcalidrawElement {
+  const size = DEVICES.find((d) => d.device === device);
+  if (!size) throw new Error(`No screen size for device "${device}".`);
+  const [x, y] = nextScreenSpot(elements.filter((el) => !el.isDeleted).map(boundsOf));
+  const skeleton: Skeleton = {
+    type: 'frame',
+    x,
+    y,
+    width: size.width,
+    height: size.height,
+    name: screenName(screen, device),
+    // The converter gives frames the default shape stroke, not the one Excalidraw's frame tool uses.
+    strokeColor: FRAME_STROKE,
+    children: [],
+  };
+  const [frame] = placeFrames([skeleton], convertToExcalidrawElements([skeleton]));
+  if (!frame) throw new Error('Excalidraw made no frame for the new screen.');
+  return frame;
 }
 
 /**

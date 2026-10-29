@@ -1,5 +1,5 @@
 import './asset-path.ts';
-import { type CanvasOp, NOTE_COLOR, NOTE_PREFIX } from '@drawui/core';
+import { type CanvasOp, type Device, NOTE_COLOR, NOTE_PREFIX, screenOf } from '@drawui/core';
 import {
   CaptureUpdateAction,
   getSceneVersion,
@@ -15,7 +15,7 @@ import type {
   ExcalidrawImperativeAPI,
 } from '@excalidraw/excalidraw/types';
 import type { SceneData } from './connection.svelte.ts';
-import { applyOp } from './ops.ts';
+import { applyOp, newScreen } from './ops.ts';
 import { SyncState } from './sync.ts';
 
 // Drawing fires onChange on every pointer move; the server needs the result, not every frame.
@@ -104,6 +104,27 @@ export class Bridge {
       this.flush();
     }
     return outcome.data;
+  }
+
+  /** Adds an empty screen sized for the device, selects it, and brings it into view. */
+  addScreen(screen: string, device: Device): void {
+    const frame = newScreen(this.api.getSceneElementsIncludingDeleted(), screen, device);
+    this.api.updateScene({
+      elements: [...this.api.getSceneElementsIncludingDeleted(), frame],
+      appState: { selectedElementIds: { [frame.id]: true } },
+      captureUpdate: CaptureUpdateAction.IMMEDIATELY,
+    });
+    this.api.scrollToContent(frame, { fitToContent: true, animate: true });
+  }
+
+  /** The screen name of the selected frame, to offer another size of it. */
+  selectedScreen(): string | undefined {
+    const { selectedElementIds } = this.api.getAppState();
+    for (const el of this.api.getSceneElements() as readonly ExcalidrawElement[]) {
+      if (!selectedElementIds[el.id] || (el.type !== 'frame' && el.type !== 'magicframe')) continue;
+      return screenOf(el.name ?? undefined, el.width).screen;
+    }
+    return undefined;
   }
 
   /** Turns the selected text into notes for the agent. Returns how many changed. */

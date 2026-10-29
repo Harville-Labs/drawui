@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- **New screen** in the top bar adds an empty frame sized for a phone, tablet, or desktop and named for it, like `Login (mobile)`. With a screen selected, it offers that screen's name, so drawing another size is one click.
+- The preview switches between phone, tablet, and full width; a page wider than the pane is scaled down to fit.
+- Frames the agent draws use the normal frame color instead of the shape stroke.
 - `get_image` returns a screenshot or logo the user dropped on the canvas, and with `saveTo` writes it into the project as an asset.
 - The agent's notes land in free space beside the element instead of over other shapes.
 - Several canvas tabs on one project no longer overwrite each other's edits. The server merges each tab's drawing element by element, keeping the newer copy, and sends a tab that missed an edit the merged drawing.

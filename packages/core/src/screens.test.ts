@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { screenName, screenOf } from './screens.ts';
+import { nextScreenSpot, screenName, screenOf } from './screens.ts';
 
 describe('screenOf', () => {
   test('a (mobile) suffix names a phone screen and is dropped from the screen name', () => {
@@ -34,4 +34,18 @@ test('screenName round-trips through screenOf', () => {
   for (const device of ['phone', 'tablet', 'desktop'] as const) {
     expect(screenOf(screenName('Checkout', device), 0)).toEqual({ screen: 'Checkout', device });
   }
+});
+
+describe('nextScreenSpot', () => {
+  test('an empty canvas puts the first screen at the origin', () => {
+    expect(nextScreenSpot([])).toEqual([0, 0]);
+  });
+
+  test('a new screen goes right of everything drawn, level with the top', () => {
+    const drawn = [
+      { x: 0, y: 100, width: 390, height: 844 },
+      { x: 500, y: -40, width: 200, height: 50 },
+    ];
+    expect(nextScreenSpot(drawn)).toEqual([860, -40]);
+  });
 });

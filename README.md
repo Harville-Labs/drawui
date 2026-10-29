@@ -26,23 +26,24 @@ claude mcp add --transport http drawui http://localhost:4747/mcp
 
 Or copy [`.mcp.json`](.mcp.json) into your project's root so everyone working in it gets the server. Change the port there if you start drawui with `--port`.
 
-Pick a component library in the top bar. Sivir UI, shadcn/ui, and shadcn-svelte are suggested; for any other library, give its name and a link to its docs, and the agent reads them before building. If you like, set the URL of your dev server too, so the preview sits beside the drawing (you can hide it from the same menu). Then ask the agent to "build what I drew in drawui", or use the `build` prompt.
+Pick a component library in the top bar. Sivir UI, shadcn/ui, and shadcn-svelte are suggested; for any other library, give its name and a link to its docs, and the agent reads them before building. If you like, set the URL of your dev server too, so the preview sits beside the drawing (you can hide it from the same menu); switch it between phone, tablet, and full width to check each size. Then ask the agent to "build what I drew in drawui", or use the `build` prompt.
 
 Before its first build of a drawing, the agent asks the few questions the drawing leaves open, such as where data comes from, what a button does, or what the empty and error states look like.
 
 ## How to draw
 
-| You draw                                           | The agent reads                                                                        |
-| -------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| A rectangle, ellipse, or frame around other shapes | A container. Nesting is layout; rows and columns are inferred.                         |
-| A frame                                            | A screen, named by the frame's name                                                    |
-| Text inside a shape                                | That component's visible text, used verbatim                                           |
-| Text starting with `//`                            | A note to the agent about the element just beside it, or else the container it sits in |
-| An arrow from a note to an element                 | A note about that element                                                              |
-| An arrow between elements                          | Navigation or data flow; its label says which                                          |
-| Fill, stroke, and text colors                      | Colors to keep, mapped to the library's closest theme color                            |
-| Dashed strokes                                     | Deliberate hints                                                                       |
-| Freehand lines                                     | A rough sketch; the agent looks at an image of it                                      |
+| You draw                                            | The agent reads                                                                                      |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| A rectangle, ellipse, or frame around other shapes  | A container. Nesting is layout; rows and columns are inferred.                                       |
+| A frame                                             | A screen, named by the frame's name. **New screen** in the top bar makes one sized for a device      |
+| Frames named `Login (mobile)` and `Login (desktop)` | One screen at two sizes; the agent builds it responsive. Without a suffix, the frame's width decides |
+| Text inside a shape                                 | That component's visible text, used verbatim                                                         |
+| Text starting with `//`                             | A note to the agent about the element just beside it, or else the container it sits in               |
+| An arrow from a note to an element                  | A note about that element                                                                            |
+| An arrow between elements                           | Navigation or data flow; its label says which                                                        |
+| Fill, stroke, and text colors                       | Colors to keep, mapped to the library's closest theme color                                          |
+| Dashed strokes                                      | Deliberate hints                                                                                     |
+| Freehand lines                                      | A rough sketch; the agent looks at an image of it                                                    |
 
 Select text and use **Mark as note** to turn it into a note without typing `//`. Select part of the drawing to ask the agent to build only that part.
 

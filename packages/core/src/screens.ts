@@ -1,3 +1,5 @@
+import type { Box, Point } from './geometry.ts';
+
 export type Device = 'phone' | 'tablet' | 'desktop';
 
 /** Frame sizes for a new screen on each device, and the widths the preview switches between. */
@@ -40,4 +42,18 @@ export function screenOf(
 /** The frame name for a screen drawn for a device, the inverse of `screenOf`. */
 export function screenName(screen: string, device: Device): string {
   return `${screen.trim()} (${device === 'phone' ? 'mobile' : device})`;
+}
+
+/** Space between a new screen and what is already drawn. */
+const SCREEN_GAP = 160;
+
+/**
+ * Where a new screen goes: right of everything already drawn, level with its top, so the sizes of one
+ * screen line up side by side. An empty canvas starts at the origin.
+ */
+export function nextScreenSpot(drawn: readonly Box[]): Point {
+  if (drawn.length === 0) return [0, 0];
+  const right = Math.max(...drawn.map((b) => b.x + b.width));
+  const top = Math.min(...drawn.map((b) => b.y));
+  return [right + SCREEN_GAP, top];
 }
