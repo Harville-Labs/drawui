@@ -1,0 +1,51 @@
+name: Release
+
+# Publishes dist/drawui to npm when a GitHub release is published. The release's tag must be the
+# version in apps/server/package.json with a leading v, like v0.2.0.
+#
+# npm authenticates this workflow through trusted publishing (OIDC), set up on npmjs.com under the
+# package's Settings > Trusted publishing for this repository and release.yml. Until then, or for the
+# first publish, an NPM_TOKEN repository secret works instead.
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      # Trusted publishing needs npm 11.5.1 or later, which Node 24 ships.
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - name: Check the tag matches the package version
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          version=$(bun -p "require('./apps/server/package.json').version")
+          if [ "$TAG" != "v$version" ]; then
+            echo "::error::Release tag $TAG doesn't match v$version in apps/server/package.json. Bump the version or retag."
+            exit 1
+          fi
+      - run: bun install --frozen-lockfile
+      - run: bun run check
+      - run: bun scripts/package.ts
+      - run: bun dist/drawui/drawui.js --help
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          PRERELEASE: ${{ github.event.release.prerelease }}
+        # Prereleases go to the next tag so `bunx drawui` keeps getting the latest stable version.
+        run: npm publish dist/drawui --access public --provenance --tag "$([ "$PRERELEASE" = true ] && echo next || echo latest)"

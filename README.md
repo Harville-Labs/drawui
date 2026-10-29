@@ -80,7 +80,7 @@ bun start ~/code/my-app   # start the server from source on a project
 bun run package # build the npm package in dist/drawui
 ```
 
-To release, bump `version` in `apps/server/package.json`, run `bun run package`, and publish with `npm publish dist/drawui`.
+To release, bump `version` in `apps/server/package.json`, merge it, and publish a GitHub release tagged with that version, like `v0.2.0`. The [release workflow](.github/workflows/release.yml) checks the build and publishes `dist/drawui` to npm; a prerelease goes to the `next` tag. `bun run package` builds the same package locally.
 
 See [AGENTS.md](AGENTS.md) for the layout and the rules changes must follow.
 
