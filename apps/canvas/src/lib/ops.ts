@@ -7,6 +7,7 @@ import {
   contains,
   type DrawuiMeta,
   type ElementPatch,
+  freeSpot,
   NOTE_PREFIX,
   type Point,
   type ShapeInput,
@@ -296,17 +297,36 @@ function remove(elements: Elements, ids: string[]): OpOutcome {
   return { elements: next, data: { ids } };
 }
 
+// Excalidraw's default 20px hand-drawn font runs about this wide per character and tall per line.
+const NOTE_CHAR_WIDTH = 11;
+const NOTE_LINE_HEIGHT = 25;
+
+function isBoundText(el: ExcalidrawElement): boolean {
+  return el.type === 'text' && el.containerId != null;
+}
+
+function placeNote(target: Box, body: string, obstacles: readonly Box[]): { x: number; y: number } {
+  const lines = body.split('\n');
+  const size = {
+    width: Math.max(...lines.map((l) => l.length)) * NOTE_CHAR_WIDTH,
+    height: lines.length * NOTE_LINE_HEIGHT,
+  };
+  const [x, y] = freeSpot(target, size, obstacles, NOTE_GAP);
+  return { x, y };
+}
+
 function annotate(elements: Elements, id: string, text: string): OpOutcome {
   const target = find(elements, id);
-  const [, minY, maxX] = getCommonBounds([target]);
+  const obstacles = elements
+    .filter((el) => !el.isDeleted && el.id !== id && el.type !== 'arrow' && !isBoundText(el))
+    .map(boundsOf);
   const noteId = `note-${crypto.randomUUID().slice(0, 8)}`;
   const body = text.startsWith(NOTE_PREFIX) ? text : `${NOTE_PREFIX} ${text}`;
   const next = build(elements, [
     {
       type: 'text',
       id: noteId,
-      x: maxX + NOTE_GAP,
-      y: minY,
+      ...placeNote(boundsOf(target), body, obstacles),
       text: body,
       strokeColor: AGENT_NOTE_COLOR,
       customData: agentMeta(undefined, 'note'),

@@ -151,3 +151,44 @@ export function arrowBetween(
     ],
   };
 }
+
+function overlaps(a: Box, b: Box, pad: number): boolean {
+  return (
+    a.x < b.x + b.width + pad &&
+    b.x < a.x + a.width + pad &&
+    a.y < b.y + b.height + pad &&
+    b.y < a.y + a.height + pad
+  );
+}
+
+const SPOT_STEP = 16;
+const SPOT_MAX_STEPS = 200;
+
+/**
+ * Where to put a box of `size` near `target` without covering any obstacle: the closest free spot
+ * found by moving out from the target's right, bottom, left, and top edges, in that order of
+ * preference when two are as close. Containers around the target are obstacles too, so a note
+ * about a button lands outside its screen instead of over the screen's other parts.
+ */
+export function freeSpot(
+  target: Box,
+  size: { width: number; height: number },
+  obstacles: readonly Box[],
+  gap: number,
+): Point {
+  const sides: ((d: number) => Point)[] = [
+    (d) => [target.x + target.width + d, target.y],
+    (d) => [target.x, target.y + target.height + d],
+    (d) => [target.x - d - size.width, target.y],
+    (d) => [target.x, target.y - d - size.height],
+  ];
+  const free = ([x, y]: Point) => !obstacles.some((o) => overlaps({ x, y, ...size }, o, gap / 2));
+  for (let step = 0; step < SPOT_MAX_STEPS; step++) {
+    const d = gap + step * SPOT_STEP;
+    for (const side of sides) {
+      const spot = side(d);
+      if (free(spot)) return spot;
+    }
+  }
+  return sides[0]?.(gap) as Point;
+}
