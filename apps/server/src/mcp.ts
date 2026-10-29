@@ -141,7 +141,7 @@ export function createMcpServer(ctx: Context): McpServer {
       if (selection.length === 0) return text('Nothing is selected.');
       const parsed = parseElements(elements);
       const roots = selectedSubtrees(interpret(parsed), selection, parsed);
-      return text(outline({ roots, arrows: [], noteOwners: new Map() }));
+      return text(outline({ roots, arrows: [], owners: new Map() }));
     },
   );
 
@@ -184,7 +184,7 @@ export function createMcpServer(ctx: Context): McpServer {
   server.registerTool(
     'draw',
     {
-      description: `Adds shapes to the drawing (up to ${MAX_SHAPES_PER_CALL} per call). Give shapes an id to point arrows at them in the same call; arrows take "from" and "to" ids. Set "source" to the file (and line or component) that implements the shape. Returns the ids.`,
+      description: `Adds shapes to the drawing (up to ${MAX_SHAPES_PER_CALL} per call). Give shapes an id to point arrows at them in the same call; arrows take "from" and "to" ids. Set "source" to where the shape is implemented: {"file", "line"?, "component"?}, with the file relative to the project root. Returns the ids.`,
       inputSchema: { shapes: z.array(shapeInput).min(1).max(MAX_SHAPES_PER_CALL) },
     },
     async ({ shapes }) => {
@@ -203,7 +203,7 @@ export function createMcpServer(ctx: Context): McpServer {
     'update',
     {
       description:
-        'Moves, resizes, relabels, or recolors existing elements, or sets their "source" (null clears it).',
+        'Moves, resizes, relabels, or recolors existing elements, or sets their "source": {"file", "line"?, "component"?}, or null to clear it.',
       inputSchema: { patches: z.array(elementPatch).min(1).max(MAX_SHAPES_PER_CALL) },
     },
     async ({ patches }) => {

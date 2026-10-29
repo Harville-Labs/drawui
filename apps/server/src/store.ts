@@ -98,9 +98,13 @@ export class SceneStore {
     this.#state = { ...this.#state, selection: ids };
   }
 
-  /** Resolves true once the version passes `since`, or false when the timeout or signal ends the wait first. */
+  /**
+   * Resolves true once the version passes `since`, or false when the timeout or signal ends the wait first.
+   * A `since` ahead of the current version came from before a server restart, which restarts the count, so
+   * the caller's copy is stale and this resolves true at once.
+   */
   waitForChange(since: number, timeoutMs: number, signal?: AbortSignal): Promise<boolean> {
-    if (this.#state.version > since) return Promise.resolve(true);
+    if (this.#state.version !== since) return Promise.resolve(true);
     return new Promise((resolve) => {
       const done = (changed: boolean) => {
         clearTimeout(timer);
@@ -109,7 +113,7 @@ export class SceneStore {
         resolve(changed);
       };
       const wake = () => {
-        if (this.#state.version > since) done(true);
+        if (this.#state.version !== since) done(true);
       };
       const abort = () => done(false);
       const timer = setTimeout(() => done(false), timeoutMs);

@@ -70,6 +70,11 @@ describe('SceneStore', () => {
     expect(await store.waitForChange(0, 1000)).toBe(true);
   });
 
+  test('waitForChange resolves at once for a version from before a restart', async () => {
+    const store = await SceneStore.open(memoryFile());
+    expect(await store.waitForChange(15, 1000)).toBe(true);
+  });
+
   test('waitForChange wakes on the next change', async () => {
     const store = await SceneStore.open(memoryFile());
     const waiting = store.waitForChange(0, 5000);
