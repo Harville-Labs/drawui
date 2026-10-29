@@ -26,7 +26,9 @@ claude mcp add --transport http drawui http://localhost:4747/mcp
 
 Or copy [`.mcp.json`](.mcp.json) into your project's root so everyone working in it gets the server. Change the port there if you start drawui with `--port`.
 
-Pick a component library in the top bar (Sivir UI, shadcn/ui, and shadcn-svelte are suggested; any name works) and, if you like, the URL of your dev server so the preview sits beside the drawing. Then ask the agent to "build what I drew in drawui", or use the `build` prompt.
+Pick a component library in the top bar. Sivir UI, shadcn/ui, and shadcn-svelte are suggested; for any other library, give its name and a link to its docs, and the agent reads them before building. If you like, set the URL of your dev server too, so the preview sits beside the drawing (you can hide it from the same menu). Then ask the agent to "build what I drew in drawui", or use the `build` prompt.
+
+Before its first build of a drawing, the agent asks the few questions the drawing leaves open, such as where data comes from, what a button does, or what the empty and error states look like.
 
 ## How to draw
 
@@ -38,7 +40,8 @@ Pick a component library in the top bar (Sivir UI, shadcn/ui, and shadcn-svelte 
 | Text starting with `//`                            | A note to the agent, attached to the container it sits in      |
 | An arrow from a note to an element                 | A note about that element                                      |
 | An arrow between elements                          | Navigation or data flow; its label says which                  |
-| Dashed strokes, fills, colors                      | Deliberate hints                                               |
+| Fill, stroke, and text colors                      | Colors to keep, mapped to the library's closest theme color    |
+| Dashed strokes                                     | Deliberate hints                                               |
 | Freehand lines                                     | A rough sketch; the agent looks at an image of it              |
 
 Select text and use **Mark as note** to turn it into a note without typing `//`. Select part of the drawing to ask the agent to build only that part.
@@ -50,7 +53,7 @@ Things the agent draws are tagged as its own, and elements it implemented link t
 Everything stays on your machine. The server listens only on `127.0.0.1` and answers only requests addressed to localhost.
 
 - `drawui.excalidraw`: the drawing, in the project directory. Open it in Excalidraw too.
-- `drawui.json`: the chosen library and preview URL.
+- `drawui.json`: the chosen `library`, the `docs` link for a library drawui doesn't suggest, and the `preview` URL.
 
 Commit both if you want the drawing to live with the code.
 

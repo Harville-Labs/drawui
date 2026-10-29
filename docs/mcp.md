@@ -27,7 +27,7 @@ screen "Login" [login] 0,0 420x320 column by-agent
   // use the brand font
   rectangle "Email" [email] 40,60 340x48 by-agent
     // Validate on blur?
-  rectangle "Sign in" [submit] 40,200 160x48 fill=#a5d8ff by-agent
+  rectangle "Sign in" [submit] 40,200 160x48 fill=#a5d8ff text-color=#1971c2 by-agent
 screen "Home" [home] 560,0 420x320 by-agent
 
 arrows:
