@@ -1,11 +1,10 @@
-import { afterAll, describe, expect, test } from 'bun:test';
+import { describe, expect, test } from 'bun:test';
 import { type CanvasOp, FRAME_STROKE, gapBetween, interpret } from '@drawui/core';
 import type { ExcalidrawElement } from '@excalidraw/excalidraw/element/types';
-import { unregisterDom } from './test-dom.ts';
+import './test-dom.ts';
 
 // Excalidraw needs the DOM when it loads, so ops load after test-dom has registered one.
 const { applyOp, newScreen } = await import('./ops.ts');
-afterAll(unregisterDom);
 
 type Elements = ExcalidrawElement[];
 

@@ -1,9 +1,22 @@
 // Excalidraw reads `window` and `document` when it loads, so op tests run in happy-dom. Import this
-// before anything that imports Excalidraw, and unregister after, so other test files keep Bun's own
-// fetch and WebSocket.
+// before anything that imports Excalidraw. Bun runs every test file in one process and loads each
+// module once, so the DOM stays registered for the whole run instead of per file.
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
 
-GlobalRegistrator.register({ url: 'http://localhost:4747/' });
+// happy-dom's networking globals enforce browser rules, and Bun's fetch rejects its AbortSignal.
+// Canvas ops never touch the network, so server tests in the same run keep Bun's.
+const NETWORK = [
+  'fetch',
+  'WebSocket',
+  'AbortController',
+  'AbortSignal',
+  'Request',
+  'Response',
+  'Headers',
+];
+const native = NETWORK.map((name) => [name, Reflect.get(globalThis, name)] as const);
+if (!GlobalRegistrator.isRegistered) GlobalRegistrator.register({ url: 'http://localhost:4747/' });
+for (const [name, value] of native) Reflect.set(globalThis, name, value);
 
 // happy-dom has no canvas. Excalidraw only probes the 2D context on load and measures text with it,
 // so a context that measures every character as 8px wide is enough for ops that don't render.
@@ -27,5 +40,3 @@ globalThis.FontFace = class {
     return Promise.resolve(this);
   }
 } as never;
-
-export const unregisterDom = () => GlobalRegistrator.unregister();
