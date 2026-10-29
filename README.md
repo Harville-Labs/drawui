@@ -26,6 +26,17 @@ claude mcp add --transport http drawui http://localhost:4747/mcp
 
 Or copy [`.mcp.json`](.mcp.json) into your project's root so everyone working in it gets the server. Change the port there if you start drawui with `--port`.
 
+### The agent skill
+
+drawui ships an [agent skill](plugin/skills/drawui/SKILL.md) that teaches an agent the working loop: check the connection, ask before the first build, build, draw back, and wait for the next edit. In Claude Code, install it as a plugin, which also connects the MCP server:
+
+```sh
+claude plugin marketplace add Harville-Labs/drawui
+claude plugin install drawui@drawui
+```
+
+For other agents that read Agent Skills, copy `plugin/skills/drawui` into their skills folder, such as `~/.claude/skills` or your project's `.agents/skills`.
+
 Pick a component library in the top bar. Sivir UI, shadcn/ui, and shadcn-svelte are suggested; for any other library, give its name and a link to its docs, and the agent reads them before building. If you like, set the URL of your dev server too, so the preview sits beside the drawing. Drag the divider to resize it, expand it to fill the window, or collapse it to the right; switch it between phone, tablet, and full width to check each size. Then ask the agent to "build what I drew in drawui", or use the `build` prompt.
 
 The [user guide](docs/guide.md) covers setup, drawing conventions, and working with the agent in more detail.

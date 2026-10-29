@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- A drawui agent skill, installable in Claude Code as a plugin (`claude plugin install drawui@drawui`) that also connects the MCP server. Other agents can copy `plugin/skills/drawui`.
+- The agent instructions say to add components with the library's CLI first for libraries that copy them into the project, like shadcn/ui. Found by running the dogfood drawing through shadcn/ui and React.
 - A [user guide](docs/guide.md): setup, the canvas, drawing conventions, working with the agent, and troubleshooting.
 - Resize the preview by dragging the divider, expand it to fill the window, or collapse it to the right edge. drawui remembers the sizes in the browser.
 - Messages and agent activity, like "Select some text first" or "Agent is drawing", show as toasts instead of text in the top bar.

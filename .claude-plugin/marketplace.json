@@ -1,0 +1,16 @@
+{
+  "name": "drawui",
+  "owner": {
+    "name": "Harville Labs"
+  },
+  "metadata": {
+    "description": "drawui, a canvas for sketching UI that a coding agent builds."
+  },
+  "plugins": [
+    {
+      "name": "drawui",
+      "source": "./plugin",
+      "description": "Build frontend UI from screens you sketch on a local Excalidraw canvas."
+    }
+  ]
+}

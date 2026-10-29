@@ -24,6 +24,7 @@ bun run format                     # apply Biome fixes
 | `packages/core` | Pure logic: element parsing, interpreting a drawing into a UI tree, the outline text, geometry, the WebSocket protocol and tool input schemas | Do I/O, or import Excalidraw, Svelte, or Bun APIs                 |
 | `apps/server`   | The `drawui` CLI: static files, the `/ws` WebSocket, the stateless `/mcp` endpoint, the scene and config files on disk                        | Lay out or create Excalidraw elements; that happens in the canvas |
 | `apps/canvas`   | SvelteKit single-page app hosting Excalidraw as a React island; performs agent edits (`ops.ts`) and reports the scene                         | Talk to anything but its own server                               |
+| `plugin`        | The Claude Code plugin: the drawui agent skill and a copy of `.mcp.json` (keep the two in step); listed by `.claude-plugin/marketplace.json`  | Hold code; it installs into users' agents as plain files          |
 
 ## Invariants
 

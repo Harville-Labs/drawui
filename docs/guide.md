@@ -31,6 +31,13 @@ You need [Bun](https://bun.sh) 1.4 or later and an agent that speaks MCP over st
 
    Or copy drawui's [`.mcp.json`](../.mcp.json) into your project's root, so everyone working in the project gets the server. Change the port there if you changed it above.
 
+   Or, in Claude Code, install the drawui plugin. It connects the server and adds a skill that teaches the agent the drawui workflow:
+
+   ```sh
+   claude plugin marketplace add Harville-Labs/drawui
+   claude plugin install drawui@drawui
+   ```
+
 drawui runs only while the `bun start` command does. Stop it with Ctrl+C; the drawing is already saved.
 
 ## The canvas

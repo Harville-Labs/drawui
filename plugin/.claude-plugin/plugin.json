@@ -1,0 +1,9 @@
+{
+  "name": "drawui",
+  "description": "Build frontend UI from screens you sketch on a local Excalidraw canvas. Adds the drawui skill and connects the drawui MCP server at http://localhost:4747/mcp.",
+  "version": "0.1.0",
+  "author": { "name": "Harville Labs" },
+  "homepage": "https://github.com/Harville-Labs/drawui",
+  "repository": "https://github.com/Harville-Labs/drawui",
+  "license": "Apache-2.0"
+}
