@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- A shape the user just drew is marked selected in the outline right away; the tab now sends the new scene before the selection that names it.
 - Screens for phone, tablet, and desktop. A frame named `Login (mobile)`, or one drawn at phone width, is the phone version of `Login`; the outline shows each frame's `device=` and lists screens drawn for several devices, and the agent builds one responsive screen from them.
 - A `//` note just beside an element, within 32 pixels, is about that element, without an arrow.
 - The agent keeps the drawing's colors: the outline reports label and text colors as `text-color=`, separate from strokes, and the instructions say to map each color to the library's closest theme color.

@@ -16,6 +16,7 @@ import type {
 } from '@excalidraw/excalidraw/types';
 import type { SceneData } from './connection.svelte.ts';
 import { applyOp } from './ops.ts';
+import { SyncState } from './sync.ts';
 
 // Drawing fires onChange on every pointer move; the server needs the result, not every frame.
 const SYNC_DELAY_MS = 150;
@@ -32,8 +33,7 @@ type RemoteElements = Parameters<typeof reconcileElements>[1];
  * and runs agent ops. The scene version guards against sending back what was just applied.
  */
 export class Bridge {
-  private sentVersion = -1;
-  private selection = '';
+  private readonly sync = new SyncState();
   private timer: ReturnType<typeof setTimeout> | undefined;
 
   constructor(
@@ -46,12 +46,10 @@ export class Bridge {
     const selected = Object.keys(appState.selectedElementIds).filter(
       (id) => appState.selectedElementIds[id],
     );
-    const key = selected.sort().join(',');
-    if (key !== this.selection) {
-      this.selection = key;
-      this.out.selection(selected);
-    }
-    if (getSceneVersion(elements) === this.sentVersion) return;
+    const step = this.sync.changed(getSceneVersion(elements), selected);
+    if (step.scene === 'now') this.flush();
+    if (step.selection) this.out.selection(step.selection);
+    if (step.scene !== 'later') return;
     clearTimeout(this.timer);
     this.timer = setTimeout(() => this.flush(), SYNC_DELAY_MS);
   }
@@ -60,7 +58,7 @@ export class Bridge {
   flush(): void {
     clearTimeout(this.timer);
     const elements = this.api.getSceneElementsIncludingDeleted();
-    this.sentVersion = getSceneVersion(elements);
+    this.sync.sent(getSceneVersion(elements));
     this.out.scene({ elements, files: this.api.getFiles() });
   }
 
@@ -71,7 +69,7 @@ export class Bridge {
     });
     this.addFiles(scene.files);
     this.api.updateScene({ elements, captureUpdate: CaptureUpdateAction.NEVER });
-    this.sentVersion = getSceneVersion(this.api.getSceneElementsIncludingDeleted());
+    this.sync.sent(getSceneVersion(this.api.getSceneElementsIncludingDeleted()));
     if (elements.some((el) => !el.isDeleted))
       this.api.scrollToContent(undefined, { fitToContent: true });
   }
@@ -86,7 +84,7 @@ export class Bridge {
     );
     this.addFiles(scene.files);
     this.api.updateScene({ elements: merged, captureUpdate: CaptureUpdateAction.NEVER });
-    this.sentVersion = getSceneVersion(this.api.getSceneElementsIncludingDeleted());
+    this.sync.sent(getSceneVersion(this.api.getSceneElementsIncludingDeleted()));
   }
 
   /** Runs an agent op. Its changes go on the undo stack, so the user can take them back. */
