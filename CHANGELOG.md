@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- A `//` note just beside an element, within 32 pixels, is about that element, without an arrow.
 - The agent keeps the drawing's colors: the outline reports label and text colors as `text-color=`, separate from strokes, and the instructions say to map each color to the library's closest theme color.
 - The agent asks what the drawing leaves open (data, actions, empty and error states) before its first build.
 - Library and preview pickers in the top bar. A custom library takes a docs link, saved as `docs` in `drawui.json` and reported by `get_project`.

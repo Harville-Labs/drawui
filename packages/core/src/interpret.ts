@@ -14,6 +14,7 @@ import {
   contains,
   containsPoint,
   endpoints,
+  gapBetween,
   type Layout,
   layoutOf,
   readingRows,
@@ -65,6 +66,9 @@ export type UiTree = {
   owners: Map<string, string>;
 };
 
+/** How close a note must sit to an element, without an arrow, to be about that element. */
+export const NOTE_REACH = 32;
+
 const CONTAINER_TYPES = new Set(['rectangle', 'ellipse', 'diamond', 'frame', 'magicframe']);
 
 function kindOf(el: Element): NodeKind {
@@ -94,8 +98,9 @@ function kindOf(el: Element): NodeKind {
  * - A shape's parent is the smallest shape or frame whose box contains it. Rectangle edges mark containers.
  * - Text bound to a shape or arrow is that element's label, not a node of its own. So is free text
  *   that is the only thing inside an unlabeled shape, which is what double-clicking a hollow shape makes.
- * - Notes (text starting with `//`, or marked as a note) attach to their container, or to the element an
- *   arrow from the note points at.
+ * - Notes (text starting with `//`, or marked as a note) attach to the element an arrow from the note
+ *   points at, else to the nearest element within `NOTE_REACH` that shares their container, else to
+ *   their container.
  * - Children are ordered top to bottom, then left to right, with a layout hint.
  */
 export function interpret(elements: readonly Element[]): UiTree {
@@ -173,14 +178,33 @@ export function interpret(elements: readonly Element[]): UiTree {
     });
   }
 
+  // The nearest non-note element beside a note, inside the same container. Ties go to the smaller one,
+  // so a note under a button in a card attaches to the button when both are as close.
+  const nearestTo = (note: Element, parent: Element | undefined): Element | undefined => {
+    let best: Element | undefined;
+    let bestGap = Infinity;
+    for (const el of placed) {
+      if (el.id === note.id || el.id === parent?.id || isNote(el)) continue;
+      if (parent && !contains(box(parent), box(el))) continue;
+      const gap = gapBetween(box(note), box(el));
+      if (gap > NOTE_REACH) continue;
+      if (gap < bestGap || (gap === bestGap && best && area(box(el)) < area(box(best)))) {
+        best = el;
+        bestGap = gap;
+      }
+    }
+    return best;
+  };
+
   const roots: UiNode[] = [];
   const childrenOf = new Map<string, Element[]>();
   for (const el of placed) {
     if (owners.has(el.id)) continue;
     const parent = parentOf(el);
-    if (isNote(el) && parent) {
-      nodes.get(parent.id)?.notes.push(noteText(el));
-      owners.set(el.id, parent.id);
+    const about = isNote(el) ? (nearestTo(el, parent) ?? parent) : undefined;
+    if (about) {
+      nodes.get(about.id)?.notes.push(noteText(el));
+      owners.set(el.id, about.id);
       continue;
     }
     if (!parent) {

@@ -32,17 +32,17 @@ Before its first build of a drawing, the agent asks the few questions the drawin
 
 ## How to draw
 
-| You draw                                           | The agent reads                                                |
-| -------------------------------------------------- | -------------------------------------------------------------- |
-| A rectangle, ellipse, or frame around other shapes | A container. Nesting is layout; rows and columns are inferred. |
-| A frame                                            | A screen, named by the frame's name                            |
-| Text inside a shape                                | That component's visible text, used verbatim                   |
-| Text starting with `//`                            | A note to the agent, attached to the container it sits in      |
-| An arrow from a note to an element                 | A note about that element                                      |
-| An arrow between elements                          | Navigation or data flow; its label says which                  |
-| Fill, stroke, and text colors                      | Colors to keep, mapped to the library's closest theme color    |
-| Dashed strokes                                     | Deliberate hints                                               |
-| Freehand lines                                     | A rough sketch; the agent looks at an image of it              |
+| You draw                                           | The agent reads                                                                        |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| A rectangle, ellipse, or frame around other shapes | A container. Nesting is layout; rows and columns are inferred.                         |
+| A frame                                            | A screen, named by the frame's name                                                    |
+| Text inside a shape                                | That component's visible text, used verbatim                                           |
+| Text starting with `//`                            | A note to the agent about the element just beside it, or else the container it sits in |
+| An arrow from a note to an element                 | A note about that element                                                              |
+| An arrow between elements                          | Navigation or data flow; its label says which                                          |
+| Fill, stroke, and text colors                      | Colors to keep, mapped to the library's closest theme color                            |
+| Dashed strokes                                     | Deliberate hints                                                                       |
+| Freehand lines                                     | A rough sketch; the agent looks at an image of it                                      |
 
 Select text and use **Mark as note** to turn it into a note without typing `//`. Select part of the drawing to ask the agent to build only that part.
 

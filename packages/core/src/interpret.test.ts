@@ -163,6 +163,44 @@ describe('labels and text', () => {
     expect(tree.arrows).toEqual([]);
   });
 
+  test('a note just under a button in a screen attaches to the button, not the screen', () => {
+    const tree = interpret([
+      el({ id: 'screen', type: 'frame', x: 0, y: 0, width: 400, height: 400, name: 'Settings' }),
+      rect('save', 20, 300, 100, 40),
+      text('n', 20, 350, '// disabled until something changes'),
+    ]);
+    const screen = tree.roots[0];
+    expect(screen?.notes).toEqual([]);
+    expect(screen?.children.map((n) => n.id)).toEqual(['save']);
+    expect(screen?.children[0]?.notes).toEqual(['disabled until something changes']);
+    expect(tree.owners.get('n')).toBe('save');
+  });
+
+  test('a note beside a root element with no container attaches to it', () => {
+    const tree = interpret([rect('btn', 0, 0, 100, 40), text('n', 110, 10, '// primary')]);
+    expect(tree.roots.map((n) => n.id)).toEqual(['btn']);
+    expect(tree.roots[0]?.notes).toEqual(['primary']);
+  });
+
+  test('a note out of reach of every element attaches to its container', () => {
+    const tree = interpret([
+      rect('card', 0, 0, 400, 400),
+      rect('btn', 10, 10, 100, 40),
+      text('n', 10, 300, '// rounded corners'),
+    ]);
+    expect(tree.roots[0]?.notes).toEqual(['rounded corners']);
+    expect(tree.roots[0]?.children[0]?.notes).toEqual([]);
+  });
+
+  test('a note between two elements attaches to the closer one', () => {
+    const tree = interpret([
+      rect('a', 0, 0, 100, 40),
+      rect('b', 0, 90, 100, 40),
+      text('n', 0, 64, '// gap'),
+    ]);
+    expect(tree.owners.get('n')).toBe('b');
+  });
+
   test('a free-standing note stays a root note', () => {
     const tree = interpret([text('n', 0, 0, '// dark theme everywhere')]);
     expect(tree.roots[0]).toMatchObject({ kind: 'note', label: 'dark theme everywhere' });

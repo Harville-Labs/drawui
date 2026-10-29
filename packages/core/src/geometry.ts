@@ -62,6 +62,13 @@ export function endpoints(el: Element): [Point, Point] | null {
   ];
 }
 
+/** The shortest distance between two boxes' edges; 0 when they touch or overlap. */
+export function gapBetween(a: Box, b: Box): number {
+  const dx = Math.max(0, b.x - (a.x + a.width), a.x - (b.x + b.width));
+  const dy = Math.max(0, b.y - (a.y + a.height), a.y - (b.y + b.height));
+  return Math.hypot(dx, dy);
+}
+
 export function center(b: Box): Point {
   return [b.x + b.width / 2, b.y + b.height / 2];
 }

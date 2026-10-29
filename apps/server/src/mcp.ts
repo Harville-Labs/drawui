@@ -38,7 +38,7 @@ const INSTRUCTIONS = `drawui is a canvas where the user sketches UI. Turn the dr
 Reading a drawing:
 - A rectangle, ellipse, or frame that encloses other shapes is a container. Nesting is layout.
 - Text inside a shape is its visible label. Use it verbatim as the component's text.
-- Text that starts with "//" is a note to you, not UI. A note inside a container, or with an arrow pointing at an element, applies to that element.
+- Text that starts with "//" is a note to you, not UI. A note applies to the element its arrow points at, else the element just beside it, else the container it sits in; the outline lists it on that element.
 - Arrows between screens or elements are navigation or data flow; their labels say which.
 - Dashed strokes and freehand lines are hints the user chose on purpose. Freehand lines are rough sketches of things the shapes don't cover; get_canvas_image shows them.
 
