@@ -4,7 +4,7 @@ import type { UiArrow, UiNode, UiTree } from './interpret.ts';
  * Renders the tree as an indented outline, one element per line. Agents read this far more cheaply
  * than JSON, and every line carries the id they need to update or link the element.
  *
- *   screen "Login" [f1] 0,0 400x600 column
+ *   screen "Login" [f1] 0,0 390x844 device=phone column
  *     rectangle "Sign in" [r2] 20,40 360x48 fill=#a5d8ff
  *       // primary action, disabled until the form is valid
  */
@@ -27,6 +27,14 @@ export function outline(tree: UiTree, selected: ReadonlySet<string> = new Set())
     }
   };
   walk(tree.roots, 0);
+  const variants = screenVariants(tree.roots);
+  if (variants.length > 0) {
+    lines.push('', 'screens drawn for several devices:');
+    for (const [screen, frames] of variants) {
+      const list = frames.map((f) => `${f.device} [${f.id}]`).join(', ');
+      lines.push(`  ${JSON.stringify(screen)}: ${list}`);
+    }
+  }
   if (tree.arrows.length > 0) {
     lines.push('', 'arrows:');
     for (const arrow of tree.arrows) lines.push(`  ${arrowLine(arrow, names)}`);
@@ -42,6 +50,7 @@ function nodeLine(node: UiNode, selected: boolean): string {
   parts.push(`[${node.id}]`);
   const b = node.box;
   parts.push(`${b.x},${b.y} ${b.width}x${b.height}`);
+  if (node.device) parts.push(`device=${node.device}`);
   if (node.layout) parts.push(node.layout);
   if (node.fill) parts.push(`fill=${node.fill}`);
   if (node.stroke) parts.push(`stroke=${node.stroke}`);
@@ -56,6 +65,16 @@ function nodeLine(node: UiNode, selected: boolean): string {
   }
   if (node.byAgent) parts.push('by-agent');
   return parts.join(' ');
+}
+
+/** Screens with frames for more than one device, in the order their first frame appears. */
+function screenVariants(roots: readonly UiNode[]): [string, UiNode[]][] {
+  const byScreen = new Map<string, UiNode[]>();
+  for (const node of roots) {
+    if (node.kind !== 'screen' || !node.screen) continue;
+    byScreen.set(node.screen, [...(byScreen.get(node.screen) ?? []), node]);
+  }
+  return [...byScreen].filter(([, frames]) => new Set(frames.map((f) => f.device)).size > 1);
 }
 
 function arrowLine(arrow: UiArrow, names: ReadonlyMap<string, string>): string {

@@ -23,13 +23,19 @@ The `build` prompt asks the agent to build the drawing (or the selection) and ke
 
 ```
 version 16
-screen "Login" [login] 0,0 420x320 column by-agent
+screen "Login" [login] 0,0 420x320 device=phone column by-agent
   // use the brand font
   rectangle "Email" [email] 40,60 340x48 by-agent
     // Validate on blur?
   rectangle "Sign in" [submit] 40,200 160x48 fill=#a5d8ff text-color=#1971c2 by-agent
-screen "Home" [home] 560,0 420x320 by-agent
+screen "Home" [home] 560,0 420x320 device=phone by-agent
+screen "Home (desktop)" [home-wide] 1100,0 1440x900 device=desktop
+
+screens drawn for several devices:
+  "Home": phone [home], desktop [home-wide]
 
 arrows:
   [YQKXMOdGpYMwqQtil3OCf] "Sign in" -> "Home" : "on success" by-agent
 ```
+
+Each screen's `device=` comes from a `(mobile)`, `(tablet)`, or `(desktop)` suffix on its name, or else from its width: up to 480 pixels is a phone and up to 1024 a tablet.

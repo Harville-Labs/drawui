@@ -57,7 +57,7 @@ test('the outline nests children, shows notes, marks selection, and lists arrows
   ]);
   expect(outline(interpret(elements), new Set(['btn']))).toBe(
     [
-      'screen "Login" [f] 0,0 400x300',
+      'screen "Login" [f] 0,0 400x300 device=phone',
       '  // center this form',
       '  * rectangle "Sign in" [btn] 20,200 100x40 fill=#a5d8ff',
       'rectangle [home] 600,0 100x100',
@@ -84,5 +84,33 @@ test('sources and agent authorship appear on the line', () => {
   ]);
   expect(outline(interpret(elements))).toBe(
     'rectangle [r] 0,0 10x10 source=src/Nav.svelte:4 (Nav) by-agent',
+  );
+});
+
+test('screens drawn for several devices are listed together', () => {
+  const frame = (id: string, x: number, width: number, name: string) => ({
+    id,
+    type: 'frame',
+    x,
+    y: 0,
+    width,
+    height: 800,
+    name,
+    strokeColor: '#bbb',
+  });
+  const elements = parseElements([
+    frame('m', 0, 390, 'Login (mobile)'),
+    frame('d', 500, 1440, 'Login'),
+    frame('s', 2000, 1440, 'Settings'),
+  ]);
+  expect(outline(interpret(elements))).toBe(
+    [
+      'screen "Login (mobile)" [m] 0,0 390x800 device=phone',
+      'screen "Login" [d] 500,0 1440x800 device=desktop',
+      'screen "Settings" [s] 2000,0 1440x800 device=desktop',
+      '',
+      'screens drawn for several devices:',
+      '  "Login": phone [m], desktop [d]',
+    ].join('\n'),
   );
 });

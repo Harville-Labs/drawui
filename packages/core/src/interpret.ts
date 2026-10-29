@@ -20,6 +20,7 @@ import {
   readingRows,
   rounded,
 } from './geometry.ts';
+import { type Device, screenOf } from './screens.ts';
 
 export type NodeKind = 'screen' | 'shape' | 'text' | 'note' | 'image' | 'embed' | 'sketch';
 
@@ -38,6 +39,10 @@ export type UiNode = {
   textColor?: string;
   dashed?: boolean;
   link?: string;
+  /** For screens: the screen this frame draws, without a device suffix in its name. */
+  screen?: string;
+  /** For screens: the device this frame is drawn for. */
+  device?: Device;
   /** How the children are arranged, when there are two or more. */
   layout?: Layout;
   /** Notes to the agent written inside this element, or pointed at it with an arrow. */
@@ -252,6 +257,7 @@ function toNode(el: Element, labels: Map<string, Element>): UiNode {
           : bound?.text?.trim();
   const node: UiNode = { id: el.id, kind, box: rounded(boxOf(el)), notes: [], children: [] };
   if (kind === 'shape') node.shape = el.type;
+  if (kind === 'screen') Object.assign(node, screenOf(el.name ?? undefined, Math.abs(el.width)));
   if (label) node.label = label;
   if (el.backgroundColor !== 'transparent') node.fill = el.backgroundColor;
   // A text element's stroke is its text color; a note's color is drawui's, not the user's.
