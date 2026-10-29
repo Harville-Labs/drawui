@@ -9,6 +9,8 @@ import { Connection } from '$lib/connection.svelte.ts';
 
 let bridge: Bridge | undefined;
 let message = $state('');
+// Hiding the preview keeps its URL, so showing it again needs no retyping.
+let previewHidden = $state(false);
 
 const connection = new Connection({
   load: (scene) => bridge?.load(scene),
@@ -18,6 +20,8 @@ const connection = new Connection({
     return bridge.run(op);
   },
 });
+
+const previewShown = $derived(Boolean(connection.project.preview) && !previewHidden);
 
 // The connection starts once Excalidraw is ready, so the saved drawing has somewhere to go.
 function ready(api: ExcalidrawImperativeAPI) {
@@ -50,12 +54,15 @@ onDestroy(() => {
     project={connection.project}
     activity={connection.activity}
     {message}
+    {previewShown}
     onproject={(patch) => connection.setProject(patch)}
     onmarknote={markNote}
+    ontogglepreview={() => (previewHidden = !previewHidden)}
   />
-  <main class="grid min-h-0 flex-1 {connection.project.preview ? 'grid-cols-2' : 'grid-cols-1'}">
+  <!-- The canvas keeps the larger share: below about 730px Excalidraw switches to its phone layout. -->
+  <main class="grid min-h-0 flex-1 {previewShown ? 'grid-cols-[3fr_2fr]' : 'grid-cols-1'}">
     <Canvas onready={ready} onchange={(elements, appState) => bridge?.changed(elements, appState)} />
-    {#if connection.project.preview}
+    {#if previewShown && connection.project.preview}
       <Preview url={connection.project.preview} />
     {/if}
   </main>

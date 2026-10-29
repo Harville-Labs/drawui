@@ -14,11 +14,23 @@ type Props = {
   project: ProjectConfig;
   activity: string;
   message: string;
+  /** Whether the preview pane is shown, when there is a preview URL. */
+  previewShown: boolean;
   onproject: (patch: ProjectPatch) => void;
   onmarknote: () => void;
+  ontogglepreview: () => void;
 };
 
-let { status, project, activity, message, onproject, onmarknote }: Props = $props();
+let {
+  status,
+  project,
+  activity,
+  message,
+  previewShown,
+  onproject,
+  onmarknote,
+  ontogglepreview,
+}: Props = $props();
 
 const statusText: Record<Status, string> = {
   connecting: 'Connecting',
@@ -42,7 +54,7 @@ function checkPreview(value: string) {
   <SettingField
     label="Component library"
     value={project.library ?? ''}
-    placeholder="Sivir UI"
+    placeholder="e.g. shadcn/ui"
     list="drawui-libraries"
     class="w-48"
     oncommit={(library) => onproject({ library })}
@@ -56,7 +68,7 @@ function checkPreview(value: string) {
   <SettingField
     label="Preview URL"
     value={project.preview ?? ''}
-    placeholder="http://localhost:5173"
+    placeholder="Your dev server URL"
     class="w-64"
     validate={checkPreview}
     oncommit={(preview) => onproject({ preview })}
@@ -65,6 +77,12 @@ function checkPreview(value: string) {
   <Button variant="outline" onclick={onmarknote} title="Turn the selected text into notes for the agent">
     Mark as note
   </Button>
+
+  {#if project.preview}
+    <Button variant="outline" onclick={ontogglepreview} aria-pressed={previewShown}>
+      {previewShown ? 'Hide preview' : 'Show preview'}
+    </Button>
+  {/if}
 
   <p class="annotation ml-auto self-center text-muted" aria-live="polite">{activity || message}</p>
 </header>
