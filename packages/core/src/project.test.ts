@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import { canvasOp } from './ops.ts';
-import { applyProjectPatch, detectStack, projectConfig } from './project.ts';
+import { applyProjectPatch, detectStack, docsFor, projectConfig } from './project.ts';
 import { decode, fromCanvas } from './protocol.ts';
 
 describe('detectStack', () => {
@@ -50,6 +50,21 @@ describe('project config', () => {
       applyProjectPatch({ library: 'Sivir UI', preview: 'http://localhost:5173' }, { preview: '' }),
     ).toEqual({
       library: 'Sivir UI',
+    });
+  });
+
+  test("a custom docs link wins over the suggested library's docs", () => {
+    expect(docsFor({ library: 'Sivir UI' })).toBe('https://www.sivir.dev');
+    expect(docsFor({ library: 'Acme UI', docs: 'https://ui.acme.dev/docs' })).toBe(
+      'https://ui.acme.dev/docs',
+    );
+    expect(docsFor({ library: 'Acme UI' })).toBeUndefined();
+  });
+
+  test('the docs link must be http or https', () => {
+    expect(projectConfig.safeParse({ docs: 'file:///etc/passwd' }).success).toBe(false);
+    expect(applyProjectPatch({ library: 'Acme', docs: 'https://acme.dev' }, { docs: '' })).toEqual({
+      library: 'Acme',
     });
   });
 

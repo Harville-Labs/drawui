@@ -107,6 +107,23 @@ describe('labels and text', () => {
     expect(tree.roots[0]?.children[0]).toMatchObject({ kind: 'text', label: 'Welcome' });
   });
 
+  test('label and text colors are text colors, not strokes', () => {
+    const tree = interpret([
+      rect('btn', 0, 0, 120, 50, { strokeColor: '#e03131' }),
+      text('t', 10, 10, 'Delete', { containerId: 'btn', strokeColor: '#ffffff' }),
+      rect('card', 200, 0, 300, 100),
+      text('warn', 210, 10, 'Careful', { strokeColor: '#f08c00' }),
+      rect('field', 210, 40, 150, 30),
+      rect('hollow', 600, 0, 120, 50),
+      text('free', 630, 15, 'Go', { strokeColor: '#2f9e44' }),
+    ]);
+    expect(findNode(tree.roots, 'btn')).toMatchObject({ stroke: '#e03131', textColor: '#ffffff' });
+    const warn = findNode(tree.roots, 'warn');
+    expect(warn).toMatchObject({ textColor: '#f08c00' });
+    expect(warn?.stroke).toBeUndefined();
+    expect(findNode(tree.roots, 'hollow')).toMatchObject({ label: 'Go', textColor: '#2f9e44' });
+  });
+
   test("a frame's default stroke is not reported, a recolored one is", () => {
     const frame = (id: string, x: number, strokeColor: string) =>
       el({ id, type: 'frame', x, y: 0, width: 100, height: 100, strokeColor });

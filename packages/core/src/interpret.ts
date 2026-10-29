@@ -33,6 +33,8 @@ export type UiNode = {
   box: Box;
   fill?: string;
   stroke?: string;
+  /** The color of the label or text, when it isn't the default. */
+  textColor?: string;
   dashed?: boolean;
   link?: string;
   /** How the children are arranged, when there are two or more. */
@@ -100,10 +102,10 @@ export function interpret(elements: readonly Element[]): UiTree {
   const live = elements.filter((el) => !el.isDeleted);
   const byId = new Map(live.map((el) => [el.id, el]));
 
-  const labels = new Map<string, string>();
+  const labels = new Map<string, Element>();
   for (const el of live) {
     if (el.type === 'text' && el.containerId && byId.has(el.containerId)) {
-      labels.set(el.containerId, (el.text ?? '').trim());
+      labels.set(el.containerId, el);
     }
   }
 
@@ -160,7 +162,7 @@ export function interpret(elements: readonly Element[]): UiTree {
       owners.set(fromEl.id, toNodeRef.id);
       continue;
     }
-    const label = labels.get(el.id);
+    const label = labels.get(el.id)?.text?.trim();
     arrows.push({
       id: el.id,
       from,
@@ -197,6 +199,7 @@ export function interpret(elements: readonly Element[]): UiTree {
       const child = nodes.get(only.id) as UiNode;
       if (child.kind === 'text' && child.label) {
         parent.label = child.label;
+        if (child.textColor) parent.textColor = child.textColor;
         owners.set(child.id, parent.id);
         continue;
       }
@@ -211,9 +214,10 @@ export function interpret(elements: readonly Element[]): UiTree {
   return { roots: rootRows.flat(), arrows, owners };
 }
 
-function toNode(el: Element, labels: Map<string, string>): UiNode {
+function toNode(el: Element, labels: Map<string, Element>): UiNode {
   const meta = metaOf(el);
   const kind = kindOf(el);
+  const bound = labels.get(el.id);
   const label =
     kind === 'screen'
       ? (el.name ?? undefined)
@@ -221,13 +225,19 @@ function toNode(el: Element, labels: Map<string, string>): UiNode {
         ? (el.text ?? '').trim()
         : kind === 'note'
           ? noteText(el)
-          : labels.get(el.id);
+          : bound?.text?.trim();
   const node: UiNode = { id: el.id, kind, box: rounded(boxOf(el)), notes: [], children: [] };
   if (kind === 'shape') node.shape = el.type;
   if (label) node.label = label;
   if (el.backgroundColor !== 'transparent') node.fill = el.backgroundColor;
-  const defaultStroke = kind === 'screen' ? FRAME_STROKE : DEFAULT_STROKE;
-  if (el.strokeColor !== defaultStroke && kind !== 'note') node.stroke = el.strokeColor;
+  // A text element's stroke is its text color; a note's color is drawui's, not the user's.
+  if (kind === 'text') {
+    if (el.strokeColor !== DEFAULT_STROKE) node.textColor = el.strokeColor;
+  } else if (kind !== 'note') {
+    const defaultStroke = kind === 'screen' ? FRAME_STROKE : DEFAULT_STROKE;
+    if (el.strokeColor !== defaultStroke) node.stroke = el.strokeColor;
+  }
+  if (bound && bound.strokeColor !== DEFAULT_STROKE) node.textColor = bound.strokeColor;
   if (el.strokeStyle !== 'solid') node.dashed = true;
   if (el.link) node.link = el.link;
   if (meta.source) node.source = meta.source;

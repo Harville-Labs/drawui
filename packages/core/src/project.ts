@@ -17,19 +17,25 @@ export const SUGGESTED_LIBRARIES = [
   },
 ] as const;
 
-const previewUrl = z
-  .url({ protocol: /^https?$/, error: 'The preview must be an http:// or https:// URL.' })
-  .max(2000);
+const httpUrl = (what: string) =>
+  z
+    .url({ protocol: /^https?$/, error: `The ${what} must be an http:// or https:// URL.` })
+    .max(2000);
+const previewUrl = httpUrl('preview');
+const docsUrl = httpUrl('docs link');
 
 /** `drawui.json` in the project root. Every field is optional; a blank project starts with `{}`. */
 export const projectConfig = z.object({
   library: z.string().trim().min(1).max(100).optional(),
+  /** Where the agent reads the library's docs, for a library drawui doesn't suggest. */
+  docs: docsUrl.optional(),
   preview: previewUrl.optional(),
 });
 export type ProjectConfig = z.infer<typeof projectConfig>;
 
 export const projectPatch = z.object({
   library: z.string().trim().max(100).optional(),
+  docs: z.union([docsUrl, z.literal('')]).optional(),
   preview: z.union([previewUrl, z.literal('')]).optional(),
 });
 export type ProjectPatch = z.infer<typeof projectPatch>;
@@ -37,13 +43,19 @@ export type ProjectPatch = z.infer<typeof projectPatch>;
 /** Applies a patch; an empty string clears that field. */
 export function applyProjectPatch(config: ProjectConfig, patch: ProjectPatch): ProjectConfig {
   const next: ProjectConfig = { ...config };
-  for (const key of ['library', 'preview'] as const) {
+  for (const key of ['library', 'docs', 'preview'] as const) {
     const value = patch[key];
     if (value === undefined) continue;
     if (value === '') delete next[key];
     else next[key] = value;
   }
   return next;
+}
+
+/** The docs the agent should read: the project's own link, else the suggested library's. */
+export function docsFor(config: ProjectConfig): string | undefined {
+  if (config.docs) return config.docs;
+  return SUGGESTED_LIBRARIES.find((lib) => lib.name === config.library)?.docs;
 }
 
 const packageJson = z.looseObject({

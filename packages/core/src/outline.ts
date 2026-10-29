@@ -45,6 +45,7 @@ function nodeLine(node: UiNode, selected: boolean): string {
   if (node.layout) parts.push(node.layout);
   if (node.fill) parts.push(`fill=${node.fill}`);
   if (node.stroke) parts.push(`stroke=${node.stroke}`);
+  if (node.textColor) parts.push(`text-color=${node.textColor}`);
   if (node.dashed) parts.push('dashed');
   if (node.link) parts.push(`link=${node.link}`);
   if (node.source) {
