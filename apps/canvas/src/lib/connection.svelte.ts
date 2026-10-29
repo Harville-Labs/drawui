@@ -19,23 +19,21 @@ export type Handlers = {
   scene(scene: SceneData): void;
   /** An agent asked for work only the canvas can do. Resolve with the reply data, or throw. */
   request(op: CanvasOp): Promise<unknown>;
+  /** What an agent is doing, like "Agent is drawing", to show the person at the canvas. */
+  activity(text: string): void;
 };
 
 const MIN_RETRY_MS = 250;
 const MAX_RETRY_MS = 5000;
-// How long an agent's activity message stays in the top bar.
-const ACTIVITY_MS = 4000;
 
 /** The canvas tab's link to the drawui server. Reconnects on its own, with backoff. */
 export class Connection {
   status = $state<Status>('connecting');
   project = $state<ProjectConfig>({});
-  activity = $state('');
 
   private socket: WebSocket | undefined;
   private retryMs = MIN_RETRY_MS;
   private retryTimer: ReturnType<typeof setTimeout> | undefined;
-  private activityTimer: ReturnType<typeof setTimeout> | undefined;
   private stopped = false;
 
   constructor(private readonly handlers: Handlers) {}
@@ -48,7 +46,6 @@ export class Connection {
   stop(): void {
     this.stopped = true;
     clearTimeout(this.retryTimer);
-    clearTimeout(this.activityTimer);
     this.socket?.close();
   }
 
@@ -107,11 +104,7 @@ export class Connection {
         this.project = message.project;
         break;
       case 'activity':
-        this.activity = message.text;
-        clearTimeout(this.activityTimer);
-        this.activityTimer = setTimeout(() => {
-          this.activity = '';
-        }, ACTIVITY_MS);
+        this.handlers.activity(message.text);
         break;
       case 'request':
         try {

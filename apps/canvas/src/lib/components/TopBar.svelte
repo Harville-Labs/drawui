@@ -9,8 +9,6 @@ import ScreenMenu from './ScreenMenu.svelte';
 type Props = {
   status: Status;
   project: ProjectConfig;
-  activity: string;
-  message: string;
   /** Whether the preview pane is shown, when there is a preview URL. */
   previewShown: boolean;
   onproject: (patch: ProjectPatch) => void;
@@ -23,8 +21,6 @@ type Props = {
 let {
   status,
   project,
-  activity,
-  message,
   previewShown,
   onproject,
   onmarknote,
@@ -59,6 +55,4 @@ const statusVariant = { connecting: 'warning', open: 'success', closed: 'error' 
   <Button variant="outline" onclick={onmarknote} title="Turn the selected text into notes for the agent">
     Mark as note
   </Button>
-
-  <p class="annotation ml-auto self-center text-muted" aria-live="polite">{activity || message}</p>
 </header>
