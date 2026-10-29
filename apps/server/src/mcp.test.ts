@@ -132,7 +132,7 @@ describe('MCP over HTTP', () => {
       arguments: { since: 0, timeoutSeconds: 5 },
     });
     await Bun.sleep(50);
-    scene.setScene([{ id: 'new', type: 'rectangle', x: 0, y: 0, width: 10, height: 10 }], {});
+    scene.mergeScene([{ id: 'new', type: 'rectangle', x: 0, y: 0, width: 10, height: 10 }], {});
     expect(textOf(await waiting)).toStartWith('version 1');
   });
 

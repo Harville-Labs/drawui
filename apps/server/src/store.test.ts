@@ -25,7 +25,7 @@ describe('SceneStore', () => {
   test('a change bumps the version and is saved in Excalidraw format', async () => {
     const file = memoryFile();
     const store = await SceneStore.open(file);
-    expect(store.setScene([rect], {})).toBe(true);
+    expect(store.mergeScene([rect], {}).changed).toBe(true);
     await store.flush();
     expect(store.snapshot.version).toBe(1);
     expect(JSON.parse(file.text ?? '')).toMatchObject({
@@ -38,7 +38,7 @@ describe('SceneStore', () => {
   test('deleted elements are left out of the saved file', async () => {
     const file = memoryFile();
     const store = await SceneStore.open(file);
-    store.setScene([rect, { ...rect, id: 'gone', isDeleted: true }], {});
+    store.mergeScene([rect, { ...rect, id: 'gone', isDeleted: true }], {});
     await store.flush();
     expect(JSON.parse(file.text ?? '').elements).toEqual([rect]);
     expect(store.snapshot.elements).toHaveLength(2);
@@ -47,9 +47,9 @@ describe('SceneStore', () => {
   test('an identical scene is not a change', async () => {
     const file = memoryFile();
     const store = await SceneStore.open(file);
-    store.setScene([rect], {});
+    store.mergeScene([rect], {});
     await store.flush();
-    expect(store.setScene([{ ...rect }], {})).toBe(false);
+    expect(store.mergeScene([{ ...rect }], {}).changed).toBe(false);
     await store.flush();
     expect(store.snapshot.version).toBe(1);
     expect(file.writes).toBe(1);
@@ -58,15 +58,27 @@ describe('SceneStore', () => {
   test('changes made during a save are written after it', async () => {
     const file = memoryFile();
     const store = await SceneStore.open(file);
-    store.setScene([rect], {});
-    store.setScene([{ ...rect, x: 5 }], {});
+    store.mergeScene([rect], {});
+    store.mergeScene([{ ...rect, x: 5 }], {});
     await store.flush();
     expect(JSON.parse(file.text ?? '').elements[0].x).toBe(5);
   });
 
+  test('a tab that missed another tab’s edit keeps that edit and is told it is behind', async () => {
+    const store = await SceneStore.open(memoryFile());
+    const a1 = { ...rect, version: 1, versionNonce: 1 };
+    const b1 = { ...rect, id: 'b', version: 1, versionNonce: 1 };
+    store.mergeScene([a1], {});
+    // The other tab drew b, then this tab, which never saw b, moved a.
+    store.mergeScene([a1, b1], {});
+    const result = store.mergeScene([{ ...a1, x: 30, version: 2 }], {});
+    expect(result).toEqual({ changed: true, senderBehind: true });
+    expect(store.snapshot.elements).toEqual([{ ...a1, x: 30, version: 2 }, b1]);
+  });
+
   test('waitForChange resolves at once when the version is already past', async () => {
     const store = await SceneStore.open(memoryFile());
-    store.setScene([rect], {});
+    store.mergeScene([rect], {});
     expect(await store.waitForChange(0, 1000)).toBe(true);
   });
 
@@ -78,7 +90,7 @@ describe('SceneStore', () => {
   test('waitForChange wakes on the next change', async () => {
     const store = await SceneStore.open(memoryFile());
     const waiting = store.waitForChange(0, 5000);
-    store.setScene([rect], {});
+    store.mergeScene([rect], {});
     expect(await waiting).toBe(true);
   });
 

@@ -1,5 +1,6 @@
 import { rename, writeFile } from 'node:fs/promises';
 import { z } from 'zod';
+import { mergeScenes } from './merge.ts';
 
 /** A file the store reads once and rewrites on every change. Injected so tests stay off the disk. */
 export interface TextFile {
@@ -83,15 +84,30 @@ export class SceneStore {
     return this.#state;
   }
 
-  /** Replaces the drawing. Returns false, and changes nothing, when it's identical to the current one. */
-  setScene(elements: unknown[], files: Record<string, unknown>): boolean {
+  /**
+   * Merges a tab's drawing into the held one, keeping the newer copy of each element. `changed` is
+   * false, and nothing is saved, when the result is identical to what was held. `senderBehind` says
+   * the tab lacks part of the result and should be sent the snapshot.
+   */
+  mergeScene(
+    incoming: unknown[],
+    incomingFiles: Record<string, unknown>,
+  ): { changed: boolean; senderBehind: boolean } {
+    const { elements, files, senderBehind } = mergeScenes(this.#state, {
+      elements: incoming,
+      files: incomingFiles,
+    });
     const serialized = serialize(elements, files);
-    if (serialized === this.#serialized) return false;
+    if (serialized === this.#serialized) {
+      // Same drawing, but a deletion only lives in memory, so keep the merged elements.
+      this.#state = { ...this.#state, elements };
+      return { changed: false, senderBehind };
+    }
     this.#serialized = serialized;
     this.#state = { ...this.#state, elements, files, version: this.#state.version + 1 };
     this.#save();
     for (const wake of this.#waiters) wake();
-    return true;
+    return { changed: true, senderBehind };
   }
 
   setSelection(ids: string[]): void {

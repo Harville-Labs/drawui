@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { decode, fromCanvas, WS_PATH } from '@drawui/core';
+import { decode, fromCanvas, type ToCanvas, WS_PATH } from '@drawui/core';
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 import type { Server, ServerWebSocket } from 'bun';
 import { type Context, createMcpServer } from './mcp.ts';
@@ -120,11 +120,17 @@ export function serve(ctx: Context, { port, canvasDir }: ServeOptions): Server<u
         switch (message.type) {
           case 'scene':
             hub.touch(ws);
-            if (scene.setScene(message.elements, message.files)) {
-              hub.broadcast(
-                { type: 'scene', elements: message.elements, files: message.files },
-                ws,
-              );
+            {
+              const { changed, senderBehind } = scene.mergeScene(message.elements, message.files);
+              const { elements, files } = scene.snapshot;
+              const merged: ToCanvas = {
+                type: 'scene',
+                elements: [...elements],
+                files: { ...files },
+              };
+              if (changed) hub.broadcast(merged, ws);
+              // Another tab's edit landed first: give this tab the merged drawing too.
+              if (senderBehind) hub.send(ws, merged);
             }
             break;
           case 'selection':

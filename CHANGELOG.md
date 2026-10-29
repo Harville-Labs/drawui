@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Several canvas tabs on one project no longer overwrite each other's edits. The server merges each tab's drawing element by element, keeping the newer copy, and sends a tab that missed an edit the merged drawing.
 - A shape the user just drew is marked selected in the outline right away; the tab now sends the new scene before the selection that names it.
 - Screens for phone, tablet, and desktop. A frame named `Login (mobile)`, or one drawn at phone width, is the phone version of `Login`; the outline shows each frame's `device=` and lists screens drawn for several devices, and the agent builds one responsive screen from them.
 - A `//` note just beside an element, within 32 pixels, is about that element, without an arrow.
