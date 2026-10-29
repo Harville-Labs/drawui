@@ -26,7 +26,9 @@ claude mcp add --transport http drawui http://localhost:4747/mcp
 
 Or copy [`.mcp.json`](.mcp.json) into your project's root so everyone working in it gets the server. Change the port there if you start drawui with `--port`.
 
-Pick a component library in the top bar. Sivir UI, shadcn/ui, and shadcn-svelte are suggested; for any other library, give its name and a link to its docs, and the agent reads them before building. If you like, set the URL of your dev server too, so the preview sits beside the drawing (you can hide it from the same menu); switch it between phone, tablet, and full width to check each size. Then ask the agent to "build what I drew in drawui", or use the `build` prompt.
+Pick a component library in the top bar. Sivir UI, shadcn/ui, and shadcn-svelte are suggested; for any other library, give its name and a link to its docs, and the agent reads them before building. If you like, set the URL of your dev server too, so the preview sits beside the drawing. Drag the divider to resize it, expand it to fill the window, or collapse it to the right; switch it between phone, tablet, and full width to check each size. Then ask the agent to "build what I drew in drawui", or use the `build` prompt.
+
+The [user guide](docs/guide.md) covers setup, drawing conventions, and working with the agent in more detail.
 
 Before its first build of a drawing, the agent asks the few questions the drawing leaves open, such as where data comes from, what a button does, or what the empty and error states look like.
 

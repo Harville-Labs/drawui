@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A [user guide](docs/guide.md): setup, the canvas, drawing conventions, working with the agent, and troubleshooting.
+- Resize the preview by dragging the divider, expand it to fill the window, or collapse it to the right edge. drawui remembers the sizes in the browser.
+- Messages and agent activity, like "Select some text first" or "Agent is drawing", show as toasts instead of text in the top bar.
 - **New screen** in the top bar adds an empty frame sized for a phone, tablet, or desktop and named for it, like `Login (mobile)`. With a screen selected, it offers that screen's name, so drawing another size is one click.
 - The preview switches between phone, tablet, and full width; a page wider than the pane is scaled down to fit.
 - Frames the agent draws use the normal frame color instead of the shape stroke.
