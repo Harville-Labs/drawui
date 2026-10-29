@@ -11,11 +11,7 @@ It works with any MCP client that speaks streamable HTTP, such as Claude Code an
 You need [Bun](https://bun.sh) 1.4 or later.
 
 ```sh
-git clone https://github.com/Harville-Labs/drawui
-cd drawui
-bun install
-bun run build
-bun start ~/code/my-app
+bunx drawui ~/code/my-app
 ```
 
 That opens the canvas at `http://localhost:4747` for `~/code/my-app`. Leave the path off to use the current directory, or point it at an empty folder to start from a blank canvas. Then connect your agent:
@@ -80,7 +76,11 @@ Commit both if you want the drawing to live with the code.
 ```sh
 bun run check   # lint, typecheck, tests, build, file length; what CI runs
 bun run dev     # build the canvas and start the server on the current directory
+bun start ~/code/my-app   # start the server from source on a project
+bun run package # build the npm package in dist/drawui
 ```
+
+To release, bump `version` in `apps/server/package.json`, run `bun run package`, and publish with `npm publish dist/drawui`.
 
 See [AGENTS.md](AGENTS.md) for the layout and the rules changes must follow.
 

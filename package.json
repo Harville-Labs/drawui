@@ -15,6 +15,7 @@
     "dev": "bun run --cwd apps/canvas build && bun apps/server/src/main.ts",
     "start": "bun apps/server/src/main.ts",
     "build": "bun run --cwd apps/canvas build",
+    "package": "bun run build && bun scripts/package.ts",
     "test": "bun test",
     "typecheck": "tsc -p . && bun run --cwd apps/canvas check",
     "lint": "biome check .",

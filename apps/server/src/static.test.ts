@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import { isLocalHost, isLocalOrigin } from './http.ts';
-import { resolveStatic } from './static.ts';
+import { canvasDirFor, resolveStatic } from './static.ts';
 
 describe('resolveStatic', () => {
   test('files resolve under the root', () => {
@@ -40,5 +40,15 @@ describe('host checks', () => {
     expect(isLocalOrigin('http://localhost:4747', 4747)).toBe(true);
     expect(isLocalOrigin('https://evil.example', 4747)).toBe(false);
     expect(isLocalOrigin('http://localhost:3000', 4747)).toBe(false);
+  });
+});
+
+describe('canvasDirFor', () => {
+  test('the npm package serves the canvas folder beside the bundled server', () => {
+    expect(canvasDirFor('/pkg', (path) => path === '/pkg/canvas')).toBe('/pkg/canvas');
+  });
+
+  test('a checkout serves the canvas app build', () => {
+    expect(canvasDirFor('/repo/apps/server/src', () => false)).toBe('/repo/apps/canvas/build');
   });
 });

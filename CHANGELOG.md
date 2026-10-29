@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- drawui is an npm package: `bunx drawui ~/code/my-app` runs it without cloning the repo. The package bundles the server and the canvas into a few files with no dependencies.
 - A drawui agent skill, installable in Claude Code as a plugin (`claude plugin install drawui@drawui`) that also connects the MCP server. Other agents can copy `plugin/skills/drawui`.
 - The agent instructions say to add components with the library's CLI first for libraries that copy them into the project, like shadcn/ui. Found by running the dogfood drawing through shadcn/ui and React.
 - A [user guide](docs/guide.md): setup, the canvas, drawing conventions, working with the agent, and troubleshooting.

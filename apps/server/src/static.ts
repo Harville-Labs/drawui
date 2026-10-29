@@ -1,4 +1,14 @@
-import { resolve, sep } from 'node:path';
+import { join, resolve, sep } from 'node:path';
+
+/**
+ * Where the built canvas is, given the directory of the server's code: a `canvas` folder beside it in
+ * the npm package, where the bundled server and the canvas build ship together, else the canvas app's
+ * build output in a checkout.
+ */
+export function canvasDirFor(codeDir: string, isDir: (path: string) => boolean): string {
+  const packaged = join(codeDir, 'canvas');
+  return isDir(packaged) ? packaged : join(codeDir, '..', '..', 'canvas', 'build');
+}
 
 /**
  * Maps a request path to a file under `root`, or null when the path escapes it. Paths without a file

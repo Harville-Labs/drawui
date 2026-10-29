@@ -11,7 +11,7 @@ drawui is a canvas the user draws screens on. Its MCP server, `drawui`, gives yo
 ## Check the connection
 
 1. Call `get_project`. If the drawui tools aren't available or the call fails to connect, drawui isn't running or isn't connected. Tell the user:
-   - Start it on this project: `bun start <project>` from a drawui checkout. It listens on `http://localhost:4747`.
+   - Start it on this project: `bunx drawui .`. It listens on `http://localhost:4747`.
    - Connect it, if it isn't: `claude mcp add --transport http drawui http://localhost:4747/mcp`, or a `.mcp.json` with that URL. A different `--port` changes the URL.
      Then stop until they say it's running.
 2. If `canvasOpen` is false, ask the user to open the `canvas` URL in a browser. Drawing needs an open canvas; reading the saved drawing doesn't.

@@ -1,9 +1,9 @@
-import { join } from 'node:path';
+import { statSync } from 'node:fs';
 import { decode, fromCanvas, type ToCanvas, WS_PATH } from '@drawui/core';
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 import type { Server, ServerWebSocket } from 'bun';
 import { type Context, createMcpServer } from './mcp.ts';
-import { resolveStatic } from './static.ts';
+import { canvasDirFor, resolveStatic } from './static.ts';
 
 // Drawings carry pasted images as data URLs, so a scene message can be large.
 const MAX_MESSAGE_BYTES = 64 * 1024 * 1024;
@@ -153,5 +153,6 @@ export function serve(ctx: Context, { port, canvasDir }: ServeOptions): Server<u
   return server;
 }
 
-/** Where the built canvas lives relative to this file. */
-export const DEFAULT_CANVAS_DIR = join(import.meta.dir, '..', '..', 'canvas', 'build');
+export const DEFAULT_CANVAS_DIR = canvasDirFor(import.meta.dir, (path) =>
+  Boolean(statSync(path, { throwIfNoEntry: false })?.isDirectory()),
+);

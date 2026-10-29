@@ -6,24 +6,15 @@ drawui is a canvas you draw a UI on, beside a coding agent that builds it. You s
 
 You need [Bun](https://bun.sh) 1.4 or later and an agent that speaks MCP over streamable HTTP, such as Claude Code or Switchback.
 
-1. Install and build drawui once:
+1. Start drawui on your project:
 
    ```sh
-   git clone https://github.com/Harville-Labs/drawui
-   cd drawui
-   bun install
-   bun run build
-   ```
-
-2. Start it on your project:
-
-   ```sh
-   bun start ~/code/my-app
+   bunx drawui ~/code/my-app
    ```
 
    The canvas opens at `http://localhost:4747`. Leave the path off to use the current directory. Pass `--port 5000` to use another port, or `--no-open` to skip opening the browser.
 
-3. Connect your agent. For Claude Code:
+2. Connect your agent. For Claude Code:
 
    ```sh
    claude mcp add --transport http drawui http://localhost:4747/mcp
@@ -38,7 +29,7 @@ You need [Bun](https://bun.sh) 1.4 or later and an agent that speaks MCP over st
    claude plugin install drawui@drawui
    ```
 
-drawui runs only while the `bun start` command does. Stop it with Ctrl+C; the drawing is already saved.
+drawui runs only while the `bunx drawui` command does. Stop it with Ctrl+C; the drawing is already saved.
 
 ## The canvas
 
