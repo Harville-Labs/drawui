@@ -1,6 +1,7 @@
 import {
   DEFAULT_STROKE,
   type Element,
+  FRAME_STROKE,
   isNote,
   metaOf,
   noteText,
@@ -55,8 +56,11 @@ export type UiArrow = {
 export type UiTree = {
   roots: UiNode[];
   arrows: UiArrow[];
-  /** Each note's id mapped to the node it was attached to, since notes aren't nodes themselves. */
-  noteOwners: Map<string, string>;
+  /**
+   * Text that became part of another node instead of a node of its own (notes, and free text
+   * read as a shape's label), mapped to that node's id.
+   */
+  owners: Map<string, string>;
 };
 
 const CONTAINER_TYPES = new Set(['rectangle', 'ellipse', 'diamond', 'frame', 'magicframe']);
@@ -86,7 +90,8 @@ function kindOf(el: Element): NodeKind {
  * Turns Excalidraw elements into a tree of UI nodes.
  *
  * - A shape's parent is the smallest shape or frame whose box contains it. Rectangle edges mark containers.
- * - Text bound to a shape or arrow is that element's label, not a node of its own.
+ * - Text bound to a shape or arrow is that element's label, not a node of its own. So is free text
+ *   that is the only thing inside an unlabeled shape, which is what double-clicking a hollow shape makes.
  * - Notes (text starting with `//`, or marked as a note) attach to their container, or to the element an
  *   arrow from the note points at.
  * - Children are ordered top to bottom, then left to right, with a layout hint.
@@ -141,7 +146,7 @@ export function interpret(elements: readonly Element[]): UiTree {
   for (const el of placed) nodes.set(el.id, toNode(el, labels));
 
   const arrows: UiArrow[] = [];
-  const noteOwners = new Map<string, string>();
+  const owners = new Map<string, string>();
   for (const el of live) {
     if (el.type !== 'arrow') continue;
     const ends = endpoints(el);
@@ -152,7 +157,7 @@ export function interpret(elements: readonly Element[]): UiTree {
     // An arrow from a note to an element hangs the note on that element.
     if (fromEl && isNote(fromEl) && toNodeRef && from !== to) {
       toNodeRef.notes.push(noteText(fromEl));
-      noteOwners.set(fromEl.id, toNodeRef.id);
+      owners.set(fromEl.id, toNodeRef.id);
       continue;
     }
     const label = labels.get(el.id);
@@ -169,11 +174,11 @@ export function interpret(elements: readonly Element[]): UiTree {
   const roots: UiNode[] = [];
   const childrenOf = new Map<string, Element[]>();
   for (const el of placed) {
-    if (noteOwners.has(el.id)) continue;
+    if (owners.has(el.id)) continue;
     const parent = parentOf(el);
     if (isNote(el) && parent) {
       nodes.get(parent.id)?.notes.push(noteText(el));
-      noteOwners.set(el.id, parent.id);
+      owners.set(el.id, parent.id);
       continue;
     }
     if (!parent) {
@@ -187,6 +192,15 @@ export function interpret(elements: readonly Element[]): UiTree {
 
   for (const [parentId, kids] of childrenOf) {
     const parent = nodes.get(parentId) as UiNode;
+    const [only] = kids;
+    if (kids.length === 1 && only && parent.kind === 'shape' && !parent.label) {
+      const child = nodes.get(only.id) as UiNode;
+      if (child.kind === 'text' && child.label) {
+        parent.label = child.label;
+        owners.set(child.id, parent.id);
+        continue;
+      }
+    }
     const rows = readingRows(kids, box);
     parent.children = rows.flat().map((k) => nodes.get(k.id) as UiNode);
     const layout = layoutOf(rows);
@@ -194,7 +208,7 @@ export function interpret(elements: readonly Element[]): UiTree {
   }
 
   const rootRows = readingRows(roots, (n) => n.box);
-  return { roots: rootRows.flat(), arrows, noteOwners };
+  return { roots: rootRows.flat(), arrows, owners };
 }
 
 function toNode(el: Element, labels: Map<string, string>): UiNode {
@@ -212,7 +226,8 @@ function toNode(el: Element, labels: Map<string, string>): UiNode {
   if (kind === 'shape') node.shape = el.type;
   if (label) node.label = label;
   if (el.backgroundColor !== 'transparent') node.fill = el.backgroundColor;
-  if (el.strokeColor !== DEFAULT_STROKE && kind !== 'note') node.stroke = el.strokeColor;
+  const defaultStroke = kind === 'screen' ? FRAME_STROKE : DEFAULT_STROKE;
+  if (el.strokeColor !== defaultStroke && kind !== 'note') node.stroke = el.strokeColor;
   if (el.strokeStyle !== 'solid') node.dashed = true;
   if (el.link) node.link = el.link;
   if (meta.source) node.source = meta.source;
@@ -242,7 +257,7 @@ export function selectedSubtrees(
   const containerOf = new Map(
     elements.filter((el) => el.containerId).map((el) => [el.id, el.containerId as string]),
   );
-  const ids = new Set(selected.map((id) => containerOf.get(id) ?? tree.noteOwners.get(id) ?? id));
+  const ids = new Set(selected.map((id) => containerOf.get(id) ?? tree.owners.get(id) ?? id));
   const out: UiNode[] = [];
   const walk = (nodes: readonly UiNode[]) => {
     for (const node of nodes) {

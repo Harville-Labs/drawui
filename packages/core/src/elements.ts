@@ -64,6 +64,8 @@ export function metaOf(el: Element): DrawuiMeta {
 }
 
 export const DEFAULT_STROKE = '#1e1e1e';
+/** Excalidraw's stroke for new frames. */
+export const FRAME_STROKE = '#bbb';
 export const NOTE_COLOR = '#f08c00';
 export const AGENT_NOTE_COLOR = '#9c36b5';
 

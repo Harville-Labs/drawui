@@ -9,7 +9,16 @@ test('an empty canvas says so', () => {
 
 test('the outline nests children, shows notes, marks selection, and lists arrows by label', () => {
   const elements = parseElements([
-    { id: 'f', type: 'frame', x: 0, y: 0, width: 400, height: 300, name: 'Login' },
+    {
+      id: 'f',
+      type: 'frame',
+      x: 0,
+      y: 0,
+      width: 400,
+      height: 300,
+      name: 'Login',
+      strokeColor: '#bbb',
+    },
     {
       id: 'btn',
       type: 'rectangle',

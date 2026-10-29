@@ -82,9 +82,37 @@ describe('labels and text', () => {
     expect(tree.roots[0]).toMatchObject({ id: 'btn', label: 'Sign up', children: [] });
   });
 
-  test('loose text inside a container is a text child', () => {
-    const tree = interpret([rect('card', 0, 0, 200, 100), text('t', 10, 10, 'Email')]);
+  test('loose text next to other children is a text child', () => {
+    const tree = interpret([
+      rect('card', 0, 0, 200, 100),
+      text('t', 10, 10, 'Email'),
+      rect('field', 10, 40, 150, 30),
+    ]);
     expect(tree.roots[0]?.children[0]).toMatchObject({ kind: 'text', label: 'Email' });
+    expect(tree.roots[0]?.label).toBeUndefined();
+  });
+
+  test('free text alone inside an unlabeled shape is its label', () => {
+    const tree = interpret([rect('btn', 0, 0, 120, 50), text('t', 30, 15, 'Save')]);
+    expect(tree.roots[0]).toMatchObject({ id: 'btn', label: 'Save', children: [] });
+    expect(selectedSubtrees(tree, ['t'], []).map((n) => n.id)).toEqual(['btn']);
+  });
+
+  test('free text alone inside a frame stays a child, since the frame name is its label', () => {
+    const tree = interpret([
+      el({ id: 'f', type: 'frame', x: 0, y: 0, width: 300, height: 300, name: 'Home' }),
+      text('t', 10, 10, 'Welcome'),
+    ]);
+    expect(tree.roots[0]).toMatchObject({ label: 'Home' });
+    expect(tree.roots[0]?.children[0]).toMatchObject({ kind: 'text', label: 'Welcome' });
+  });
+
+  test("a frame's default stroke is not reported, a recolored one is", () => {
+    const frame = (id: string, x: number, strokeColor: string) =>
+      el({ id, type: 'frame', x, y: 0, width: 100, height: 100, strokeColor });
+    const tree = interpret([frame('plain', 0, '#bbb'), frame('red', 200, '#e03131')]);
+    expect(tree.roots[0]?.stroke).toBeUndefined();
+    expect(tree.roots[1]?.stroke).toBe('#e03131');
   });
 
   test('a // note inside a container attaches to it', () => {
